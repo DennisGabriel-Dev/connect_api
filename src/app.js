@@ -1,17 +1,30 @@
-import express from 'express'
-import usuariosRoutes from './routes/usuariosRoutes.js'
-const app = express()
-const port = 5000
+import express from 'express';
+import cors from 'cors';
 
+// Importação das rotas
+import usuariosRoutes from './routes/usuariosRoutes.js'; 
+import authRoutes from './routes/authRoutes.js';
+import palestrasRoutes from './routes/palestrasRoutes.js';
+
+const app = express();
+const port = 5000;
+
+// Middlewares Globais
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cors()); // cors para o acesso mobile
 
+// Rotas
 app.use('/api/v1/usuarios', usuariosRoutes);
+app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/palestras', palestrasRoutes);
 
+// Rota Raiz de Teste
 app.get('/', (req, res) => {
-  res.send('Hello World!')
-})
+  res.send('API Connect rodando');
+});
 
+// Inicialização do Servidor
 app.listen(port, () => {
-  console.log(`Example app listening on port ${port}`)
-})
+  console.log(`Servidor rodando na porta ${port}`);
+});
