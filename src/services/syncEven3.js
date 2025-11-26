@@ -38,7 +38,7 @@ async function syncDados() {
     console.log(`${listaParticipantes.length} participantes sincronizados.`);
 
     // 2. Buscar e Salvar Palestras
-    console.log("📡 Buscando palestras...");
+    console.log("Buscando palestras...");
     const respSessoes = await axios.get('https://www.even3.com.br/api/v1/session', {
       headers: { 'Authorization-Token': EVEN3_TOKEN }
     });
