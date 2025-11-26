@@ -1,12 +1,7 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+// prisma/schema.prisma
 
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
 }
 
 datasource db {
@@ -14,8 +9,36 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Usuario {
-  id    String @id @default(auto()) @map("_id") @db.ObjectId
-  email String @unique
-  nome  String?
+// Modelo para Login 
+model Participante {
+  id           String @id @default(auto()) @map("_id") @db.ObjectId
+  even3Id      Int    @unique // id_attendees da Even3
+  nome         String // name
+  email        String @unique
+  foto         String? // photo
+  
+  @@map("participantes")
+}
+
+// Modelo para eventos 
+model Palestra {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  even3Id     Int      @unique // id_session da Even3
+  titulo      String   // title
+  descricao   String?  // description
+  tipo        String   // type 
+  local       String?  // venue
+  
+  // No Mongo, podemos salvar os palestrantes dentro da palestra (Array de objetos)
+  palestrantes PalestranteEmbed[] 
+  
+  @@map("palestras")
+}
+
+// Isso não é uma tabela, é um tipo de dado dentro da Palestra (funciona no Mongo eu acho kkkk)
+type PalestranteEmbed {
+  even3Id   Int     // id_speaker
+  nome      String  // name
+  foto      String? // photo
+  bio       String? // resume
 }
