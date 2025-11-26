@@ -1,52 +1,65 @@
 import axios from 'axios';
 import { PrismaClient } from '@prisma/client';
-import 'dotenv/config'; 
+import 'dotenv/config';
 
 const prisma = new PrismaClient();
-
-const EVEN3_TOKEN = process.env.EVEN3_TOKEN; 
+const EVEN3_TOKEN = process.env.EVEN3_TOKEN;
 
 async function syncDados() {
-  console.log("Iniciando sincronização com Even3...");
+  console.log("Sincronizando");
 
   if (!EVEN3_TOKEN) {
-    console.error("ERRO: A variável EVEN3_TOKEN não está definida no arquivo .env");
+    console.error("ERRO: Token não encontrado no .env");
     return;
   }
 
   try {
-    // 1. Buscar e Salvar Participantes (para o Login)
+    // 1. Participantes
     console.log("Buscando participantes...");
     const respParticipantes = await axios.get('https://www.even3.com.br/api/v1/attendees', {
       headers: { 'Authorization-Token': EVEN3_TOKEN }
     });
-
-    const listaParticipantes = respParticipantes.data.data || [];
-
-    for (const p of listaParticipantes) {
+    
+    for (const p of respParticipantes.data.data || []) {
       await prisma.participante.upsert({
         where: { even3Id: p.id_attendees },
         update: { nome: p.name, email: p.email, foto: p.photo },
-        create: {
-          even3Id: p.id_attendees,
-          nome: p.name,
-          email: p.email,
-          foto: p.photo
-        }
+        create: { even3Id: p.id_attendees, nome: p.name, email: p.email, foto: p.photo }
       });
     }
-    console.log(`${listaParticipantes.length} participantes sincronizados.`);
+    console.log(`Participantes sincronizados.`);
 
-    // 2. Buscar e Salvar Palestras
+    // 2. Palestras
     console.log("Buscando palestras...");
     const respSessoes = await axios.get('https://www.even3.com.br/api/v1/session', {
       headers: { 'Authorization-Token': EVEN3_TOKEN }
     });
+    
+    for (const s of respSessoes.data.data || []) {
+      
+      const horariosMapped = s.times ? s.times.map(t => {
 
-    const listaSessoes = respSessoes.data.data || [];
+        // O campo 'date' vem como "2025-12-26T00:00:00".
+        const dataApenas = t.date ? t.date.split('T')[0] : null; 
+        
+        let inicioIso = null;
+        let fimIso = null;
 
-    for (const s of listaSessoes) {
-      // Mapeia os palestrantes
+        if (dataApenas && t.start_time) {
+          inicioIso = `${dataApenas}T${t.start_time}:00`;
+        }
+        
+        if (dataApenas && t.end_time) {
+          fimIso = `${dataApenas}T${t.end_time}:00`;
+        }
+
+        return {
+          id_time: t.id_time,
+          date_start: inicioIso, 
+          date_end: fimIso
+        };
+      }) : [];
+
       const speakersMapped = s.speakers ? s.speakers.map(sp => ({
         even3Id: sp.id_speaker,
         nome: sp.name,
@@ -61,6 +74,7 @@ async function syncDados() {
           descricao: s.description,
           tipo: s.type, 
           local: s.venue,
+          horarios: horariosMapped,
           palestrantes: speakersMapped
         },
         create: {
@@ -69,14 +83,15 @@ async function syncDados() {
           descricao: s.description,
           tipo: s.type,
           local: s.venue,
+          horarios: horariosMapped,
           palestrantes: speakersMapped
         }
       });
     }
-    console.log(` ${listaSessoes.length} palestras sincronizadas.`);
+    console.log(`Palestras sincronizadas.`);
 
   } catch (error) {
-    console.error(" Erro na sincronização:", error.response?.data || error.message);
+    console.error("Erro:", error);
   } finally {
     await prisma.$disconnect();
   }
