@@ -16,6 +16,7 @@ model Participante {
   nome         String // name
   email        String @unique
   foto         String? // photo
+  senha        String? // password
   
   @@map("participantes")
 }
