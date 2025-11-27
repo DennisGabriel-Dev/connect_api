@@ -12,8 +12,13 @@
    ```bash
    npm install
    ```
+3. Inicializar Prisma Client:
 
-3. Startando o projeto
+   ```bash
+   npx prisma generate
+   ```
+
+4. Startando o projeto
 
    ```bash
    npm run start
@@ -26,6 +31,11 @@ Você irá precisar de um arquivo .env que deve ter esse conteúdo:
 DATABASE_URL=<URL_MONGO_DB>
 ```
 sugiro que o responsável de cada grupo entre em contato comigo(Dennis) para pegar a credencial do MongoDB.
+
+## Consultar e testar endpoints já existentes
+1. Instale a extensão REST Client no VS Code
+2. Abra o arquivo `api.rest` na raiz do projeto para testar os endpoints da API de forma prática
+3. Clique em "Send Request" acima de cada endpoint para executá-lo
 
 ## Regras para criação de endpoints:
 Iremos usar o padrão REST, esse [guia](https://www.alura.com.br/artigos/rest-principios-e-boas-praticas) pode ajudar. <br>
