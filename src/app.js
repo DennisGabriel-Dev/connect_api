@@ -5,6 +5,7 @@ import cors from 'cors';
 import usuariosRoutes from './routes/usuariosRoutes.js'; 
 import authRoutes from './routes/authRoutes.js';
 import palestrasRoutes from './routes/palestrasRoutes.js';
+import presencaRoutes from './routes/presencaRoutes.js';
 
 const app = express();
 const port = 5000;
@@ -18,6 +19,7 @@ app.use(cors()); // cors para o acesso mobile
 app.use('/api/v1/usuarios', usuariosRoutes);
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/palestras', palestrasRoutes);
+app.use('/api/v1/presenca', presencaRoutes);
 
 // Rota Raiz de Teste
 app.get('/', (req, res) => {
