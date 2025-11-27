@@ -25,3 +25,15 @@ GET {{baseUrl}}/api/v1/palestras
 
 ### PROGRAMAÇÃO - FILTRAR PALESTRAS
 GET {{baseUrl}}/api/v1/palestras?tipo=Workshop
+
+### PARTICIPANTES - LISTAR TODOS USUARIOS
+GET {{baseUrl}}/api/v1/usuarios
+
+### QR CODE - REGISTRAR PRESENÇA
+POST {{baseUrl}}/api/v1/presenca
+Content-Type: application/json
+
+{
+    "participanteId": "",
+    "palestraId": ""
+}
