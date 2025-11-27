@@ -1,0 +1,27 @@
+# ENDPOINTS - CONNECT API
+
+@baseUrl = http://localhost:5000
+
+### AUTENTICAÇÂO - CRIAR SENHA
+POST {{baseUrl}}/api/v1/auth/register
+Content-Type: application/json
+
+{
+ "email": "lauanderson38@gmail.com",
+ "senha": "minha_senha_secreta"
+}
+
+### AUTENTICAÇÂO - LOGIN
+POST {{baseUrl}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+ "email": "participante@email.com",
+ "senha": "minha_senha_secreta"
+}
+
+### PROGRAMAÇÃO - LISTAR PALESTRAS
+GET {{baseUrl}}/api/v1/palestras
+
+### PROGRAMAÇÃO - FILTRAR PALESTRAS
+GET {{baseUrl}}/api/v1/palestras?tipo=Workshop
