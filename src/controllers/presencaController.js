@@ -142,14 +142,16 @@ export const registrarPresencaViaQr = async (req, res) => {
       return res.status(404).json({ error: "Participante não encontrado" });
     }
 
+    // Buscar palestra/atividade
     const palestra = await prisma.palestra.findUnique({
       where: { id: palestraId }
     });
 
     if (!palestra) {
-      return res.status(404).json({ error: "Palestra não encontrada" });
+      return res.status(404).json({ error: "Palestra/Atividade não encontrada" });
     }
 
+    // Registrar presença local primeiro
     const presenca = await prisma.presenca.upsert({
       where: {
         participanteId_palestraId: {
@@ -168,9 +170,37 @@ export const registrarPresencaViaQr = async (req, res) => {
       }
     });
 
+    // Tentar check-in no Even3 
+    console.log('Sincronizando presença com Even3 (via QR)...');
+    const resultadoEven3 = await registrarPresencaEven3(
+      participante.even3Id, 
+      palestra.even3Id,
+      palestra.tipo
+    );
+    console.log('Resultado Even3:', resultadoEven3);
+
+    // Atualizar flag de sincronização se sucesso
+    if (resultadoEven3.sucesso) {
+      await prisma.presenca.update({
+        where: { id: presenca.id },
+        data: { sincronizado: true }
+      });
+    }
+
     return res.status(201).json({
       message: "Presença registrada com sucesso",
-      presenca
+      presenca: {
+        ...presenca,
+        sincronizado: resultadoEven3.sucesso
+      },
+      participante: {
+        nome: participante.nome,
+        email: participante.email
+      },
+      atividade: {
+        titulo: palestra.titulo,
+        tipo: palestra.tipo
+      }
     });
 
   } catch (error) {
