@@ -17,8 +17,8 @@ model Participante {
   documento    String?
   confirmado   Boolean  @default(false)
   
-  presencas    Presenca[]
-  feedbacks    Feedback[]
+  presencas    Presenca[]?
+  feedbacks    Feedback[]?
   
   @@map("participantes")
 }
@@ -30,11 +30,12 @@ model Palestra {
   descricao    String?
   tipo         String
   local        String?
+  
   horarios     Json
   palestrantes Json
   
-  presencas    Presenca[]
-  feedbacks    Feedback[]
+  presencas    Presenca[]?
+  feedbacks    Feedback[]?
   
   @@map("palestras")
 }
@@ -46,8 +47,9 @@ model Presenca {
   dataHora       DateTime @default(now())
   sincronizado   Boolean  @default(false)
   
-  participante Participante @relation(fields: [participanteId], references: [id], onDelete: Cascade)
-  palestra     Palestra     @relation(fields: [palestraId], references: [id], onDelete: Cascade)
+  // RELAÇÕES OPCIONAIS (não quebram código do QR Code)
+  participante Participante? @relation(fields: [participanteId], references: [id], onDelete: Cascade)
+  palestra     Palestra?     @relation(fields: [palestraId], references: [id], onDelete: Cascade)
   
   @@map("presencas")
   @@unique([participanteId, palestraId])

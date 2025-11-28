@@ -75,3 +75,62 @@ export const listarPresencas = async (req, res) => {
     return res.status(500).json({ error: "Erro ao listar presenças" });
   }
 };
+
+// Endpoint: Registrar presença via QR Code (GET para facilitar testes)
+// GET /api/v1/presenca/qr?participanteId=XXX&palestraId=YYY
+export const registrarPresencaViaQr = async (req, res) => {
+  try {
+    const { participanteId, palestraId } = req.query;
+
+    // Validar dados obrigatórios
+    if (!participanteId || !palestraId) {
+      return res.status(400).json({ 
+        error: "participanteId e palestraId são obrigatórios" 
+      });
+    }
+
+    // Reutilizar a lógica do registrarPresenca
+    const participante = await prisma.participante.findUnique({
+      where: { id: participanteId }
+    });
+
+    if (!participante) {
+      return res.status(404).json({ error: "Participante não encontrado" });
+    }
+
+    const palestra = await prisma.palestra.findUnique({
+      where: { id: palestraId }
+    });
+
+    if (!palestra) {
+      return res.status(404).json({ error: "Palestra não encontrada" });
+    }
+
+    const presenca = await prisma.presenca.upsert({
+      where: {
+        participanteId_palestraId: {
+          participanteId,
+          palestraId
+        }
+      },
+      update: {
+        dataHora: new Date()
+      },
+      create: {
+        participanteId,
+        palestraId,
+        dataHora: new Date(),
+        sincronizado: false
+      }
+    });
+
+    return res.status(201).json({
+      message: "Presença registrada com sucesso",
+      presenca
+    });
+
+  } catch (error) {
+    console.error("Erro ao registrar presença via QR:", error);
+    return res.status(500).json({ error: "Erro ao registrar presença" });
+  }
+};

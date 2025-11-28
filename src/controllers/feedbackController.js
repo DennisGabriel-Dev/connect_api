@@ -1,5 +1,29 @@
 import prisma from "../lib/prisma.js";
 
+// FUNÇÃO PARA VER OS ID (para teste de feedbacks)
+export const listarIdsParaTeste = async (req, res) => {
+  try {
+    // Listar participantes
+    const participantes = await prisma.participante.findMany({
+      select: { id: true, nome: true, email: true }
+    });
+
+    // Listar palestras
+    const palestras = await prisma.palestra.findMany({
+      select: { id: true, titulo: true, even3Id: true }
+    });
+
+    return res.status(200).json({
+      participantes,
+      palestras
+    });
+
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: "Erro ao buscar IDs." });
+  }
+};
+
 export const criarFeedback = async (req, res) => {
   try {
     const { participanteId, palestraId, estrelas, comentario } = req.body;
@@ -8,10 +32,28 @@ export const criarFeedback = async (req, res) => {
       return res.status(400).json({ error: "Campos obrigatórios: participanteId, palestraId e estrelas." });
     }
 
+    //VALIDAÇÃO verificar se o usuario presente
+    const presenca = await prisma.presenca.findUnique({
+      where: {
+        participanteId_palestraId: {
+          participanteId,
+          palestraId
+        }
+      }
+    });
+
+    if (!presenca) {
+      return res.status(403).json({ 
+        error: "Você precisa ter comparecido à palestra para enviar feedback." 
+      });
+    }
+
+    // Valida se estrelas está entre 1-5
     if (estrelas < 1 || estrelas > 5) {
       return res.status(400).json({ error: "Estrelas deve ser entre 1 e 5." });
     }
 
+    // Impede duplicação de feedback
     const existente = await prisma.feedback.findUnique({
       where: {
         participanteId_palestraId: {
