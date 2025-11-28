@@ -59,3 +59,17 @@ model Presenca {
   @@map("presencas")
   @@unique([participanteId, palestraId]) // Um participante só pode marcar presença uma vez por palestra
 }
+
+//Modelo feedback
+model Feedback {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  participanteId String @db.ObjectId
+  palestraId     String @db.ObjectId
+
+  estrelas     Int      // rating de 1 a 5
+  comentario   String?  // opcional
+  data         DateTime @default(now())
+
+  @@map("feedbacks")
+  @@unique([participanteId, palestraId]) // 1 feedback por participante por palestra
+}
