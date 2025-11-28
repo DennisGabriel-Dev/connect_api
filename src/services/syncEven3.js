@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { PrismaClient } from '@prisma/client';
-import 'dotenv/config';
+import dotenv from "dotenv";
+dotenv.config();
 
 const prisma = new PrismaClient();
 const EVEN3_TOKEN = process.env.EVEN3_TOKEN;
