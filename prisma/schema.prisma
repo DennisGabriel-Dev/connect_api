@@ -2,70 +2,83 @@ generator client {
   provider = "prisma-client-js"
 }
 
+//NÃO TIREM OS COMETÁRIOS ELES DOCUMENTAM AS ALTERAÇÕES E FUNCIONALIDADES IMPORTANTES 
+
 datasource db {
   provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
 model Participante {
-  id           String   @id @default(auto()) @map("_id") @db.ObjectId
-  even3Id      Int      @unique
+  id           String @id @default(auto()) @map("_id") @db.ObjectId
+  even3Id      Int    @unique
   nome         String
-  email        String   @unique
-  foto         String?
-  senha        String?
-  documento    String?
-  confirmado   Boolean  @default(false)
+  email        String @unique
+  senha        String? 
   
-  presencas    Presenca[]?
-  feedbacks    Feedback[]?
+  // CORREÇÃO AQUI: 
+  presencas    Presenca[]
+  feedbacks    Feedback[]
   
   @@map("participantes")
 }
 
 model Palestra {
-  id           String   @id @default(auto()) @map("_id") @db.ObjectId
-  even3Id      Int      @unique
-  titulo       String
-  descricao    String?
-  tipo         String
-  local        String?
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  even3Id     Int      @unique
+  titulo      String
+  descricao   String?
+  tipo        String
+  local       String?
   
-  horarios     Json
-  palestrantes Json
+  horarios    HorarioEmbed[]
+  palestrantes PalestranteEmbed[]
   
-  presencas    Presenca[]?
-  feedbacks    Feedback[]?
+  // CORREÇÃO AQUI: Sem '?'
+  presencas    Presenca[]
+  feedbacks    Feedback[]
   
   @@map("palestras")
 }
 
+type HorarioEmbed {
+  id_time    Int?
+  date_start String? 
+  date_end   String?
+}
+
+type PalestranteEmbed {
+  even3Id   Int
+  nome      String
+  bio       String?
+}
+
 model Presenca {
-  id             String   @id @default(auto()) @map("_id") @db.ObjectId
-  participanteId String   @db.ObjectId
-  palestraId     String   @db.ObjectId
-  dataHora       DateTime @default(now())
-  sincronizado   Boolean  @default(false)
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
   
-  // RELAÇÕES OPCIONAIS (não quebram código do QR Code)
-  participante Participante? @relation(fields: [participanteId], references: [id], onDelete: Cascade)
-  palestra     Palestra?     @relation(fields: [palestraId], references: [id], onDelete: Cascade)
+  participanteId  String   @db.ObjectId
+  participante    Participante @relation(fields: [participanteId], references: [id])
+  
+  palestraId      String   @db.ObjectId
+  palestra        Palestra @relation(fields: [palestraId], references: [id])
+  
+  dataHora        DateTime @default(now())
+  sincronizado    Boolean  @default(false)
   
   @@map("presencas")
   @@unique([participanteId, palestraId])
 }
 
 model Feedback {
-  id             String   @id @default(auto()) @map("_id") @db.ObjectId
-  participanteId String   @db.ObjectId
-  palestraId     String   @db.ObjectId
-  estrelas       Int
-  comentario     String?
-  data           DateTime @default(now())
-
-  participante Participante @relation(fields: [participanteId], references: [id], onDelete: Cascade)
-  palestra     Palestra     @relation(fields: [palestraId], references: [id], onDelete: Cascade)
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  comentario      String
+  nota            Int
   
+  participanteId  String   @db.ObjectId
+  participante    Participante @relation(fields: [participanteId], references: [id])
+  
+  palestraId      String   @db.ObjectId
+  palestra        Palestra @relation(fields: [palestraId], references: [id])
+
   @@map("feedbacks")
-  @@unique([participanteId, palestraId])
 }
