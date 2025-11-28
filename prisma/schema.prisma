@@ -17,8 +17,8 @@ model Participante {
   documento    String?
   confirmado   Boolean  @default(false)
   
-  presencas    Presenca[]?
-  feedbacks    Feedback[]?
+  presencas    Presenca[]
+  feedbacks    Feedback[]
   
   @@map("participantes")
 }
@@ -34,8 +34,8 @@ model Palestra {
   horarios     Json
   palestrantes Json
   
-  presencas    Presenca[]?
-  feedbacks    Feedback[]?
+  presencas    Presenca[]
+  feedbacks    Feedback[]
   
   @@map("palestras")
 }
