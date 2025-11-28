@@ -97,4 +97,120 @@ async function syncDados() {
   }
 }
 
+// Funções para presença em tempo real
+
+// Buscar participante no Even3 por email
+export async function buscarParticipanteEven3PorEmail(email) {
+  try {
+    // Busca todos os participantes no Even3
+    console.log(`Buscando participante com email ${email} no Even3...`);
+    const response = await axios.get('https://www.even3.com.br/api/v1/attendees', {
+      headers: { 'Authorization-Token': EVEN3_TOKEN }
+    });
+
+    // Procura o participante pelo email
+    const participanteEven3 = response.data.data?.find(
+      p => p.email?.toLowerCase() === email?.toLowerCase()
+    );
+
+    if (!participanteEven3) {
+      console.log(`Participante com email ${email} não encontrado no Even3`);
+      return null;
+    }
+
+    // Usa upsert em vez de create para evitar erro de duplicação (race condition)
+    const participante = await prisma.participante.upsert({
+      where: { even3Id: participanteEven3.id_attendees },
+      update: {
+        nome: participanteEven3.name,
+        email: participanteEven3.email,
+        foto: participanteEven3.photo
+      },
+      create: {
+        even3Id: participanteEven3.id_attendees,
+        nome: participanteEven3.name,
+        email: participanteEven3.email,
+        foto: participanteEven3.photo
+      }
+    });
+
+    console.log(`Participante ${email} sincronizado do Even3`);
+    return participante;
+
+  } catch (error) {
+    console.error('Erro ao buscar participante no Even3:', error.message);
+    return null;
+  }
+}
+
+// Registrar presença no Even3 (AMBOS os check-ins)
+export async function registrarPresencaEven3(even3AttendeesId, even3SessionId, tipo = 'atividade') {
+  try {
+    // PASSO 1: Credenciar no evento geral
+    console.log(`Credenciando participante ${even3AttendeesId} no evento geral...`);
+    await credenciarEventoGeral(even3AttendeesId);
+    
+    const response = await axios.post(
+      'https://www.even3.com.br/api/v1/checkin/sessions',
+      {
+        id_attendees: even3AttendeesId,
+        id_session: even3SessionId
+      },
+      {
+        headers: { 
+          'Authorization-Token': EVEN3_TOKEN,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    
+    console.log('Check-in na atividade registrado com sucesso');
+    return { sucesso: true };
+
+  } catch (error) {
+    if (error.response) {
+      // Erro de resposta do servidor (4xx, 5xx)
+      console.error('Erro Even3 — status:', error.response.status, 'detalhes:', error.response.data);
+    } else if (error.request) {
+      // Requisição enviada, mas sem resposta (rede, timeout, CORS, etc.)
+      console.error('Erro de rede/timeout ao tentar conectar Even3:', error.request);
+    } else {
+      // Erro inesperado na configuração da requisição
+      console.error('Erro inesperado:', error.message);
+    }
+  }
+}
+
+// Credenciar no evento geral
+async function credenciarEventoGeral(even3AttendeesId) {
+  try {
+    const response = await axios.post(
+      'https://www.even3.com.br/api/v1/checkin/attendees',
+      {
+        id_attendees: even3AttendeesId
+      },
+      {
+        headers: { 
+          'Authorization-Token': EVEN3_TOKEN,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+    
+    console.log('Participante credenciado no evento geral');
+    return true;
+  } catch (error) {
+    if (error.response) {
+      // Erro de resposta do servidor (4xx, 5xx)
+      console.error('Erro Even3 — status:', error.response.status, 'detalhes:', error.response.data);
+    } else if (error.request) {
+      // Requisição enviada, mas sem resposta (rede, timeout, CORS, etc.)
+      console.error('Erro de rede/timeout ao tentar conectar Even3:', error.request);
+    } else {
+      // Erro inesperado na configuração da requisição
+      console.error('Erro inesperado:', error.message);
+    }
+  }
+}
+
 syncDados();
