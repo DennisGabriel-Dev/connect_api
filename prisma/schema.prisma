@@ -59,3 +59,22 @@ model Presenca {
   @@map("presencas")
   @@unique([participanteId, palestraId]) // Um participante só pode marcar presença uma vez por palestra
 }
+
+// Modelo para perguntas e respostas nas palestras
+model Pergunta {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  texto             String   // Texto da pergunta
+  participanteId    String   @db.ObjectId // ID do participante que fez a pergunta
+  participanteNome  String   // Nome do participante (para exibição)
+  palestraId        String   @db.ObjectId // ID da palestra
+  palestraTitulo    String   // Título da palestra (para exibição)
+  dataHora          DateTime @default(now()) // Quando foi feita a pergunta
+  respondida        Boolean  @default(false) // Se já foi respondida
+  resposta          String?  // Texto da resposta (opcional)
+  palestranteNome   String?  // Nome do palestrante que respondeu
+  dataResposta      DateTime? // Quando foi respondida
+  curtidas          Int      @default(0) // Número de curtidas na pergunta
+  
+  @@map("perguntas")
+  @@index([palestraId]) // Índice para buscar perguntas por palestra
+}

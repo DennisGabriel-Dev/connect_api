@@ -41,3 +41,49 @@ Content-Type: application/json
 ### QR CODE - LISTAR PRESENÇAS - Com o id do participante
 # GET {{baseUrl}}/api/v1/presenca/{participanteId}
 GET {{baseUrl}}/api/v1/presenca/69266189a9e74a0fc2694e61
+
+### ====================================
+### ❓ PERGUNTAS E RESPOSTAS (NOVO!)
+### ====================================
+
+### PERGUNTAS - CRIAR PERGUNTA
+POST {{baseUrl}}/api/v1/perguntas
+Content-Type: application/json
+
+{
+  "texto": "Como posso integrar Firebase no React Native?",
+  "participanteId": "69266189a9e74a0fc2694e60",
+  "participanteNome": "João Silva",
+  "palestraId": "6926618aa9e74a0fc2694e63",
+  "palestraTitulo": "Introdução ao React Native"
+}
+
+### PERGUNTAS - LISTAR TODAS DA PALESTRA
+GET {{baseUrl}}/api/v1/perguntas/palestra/6926618aa9e74a0fc2694e63
+
+### PERGUNTAS - LISTAR APENAS NÃO RESPONDIDAS
+GET {{baseUrl}}/api/v1/perguntas/palestra/6926618aa9e74a0fc2694e63?respondidas=false
+
+### PERGUNTAS - LISTAR APENAS RESPONDIDAS
+GET {{baseUrl}}/api/v1/perguntas/palestra/6926618aa9e74a0fc2694e63?respondidas=true
+
+### PERGUNTAS - LISTAR POR PARTICIPANTE
+GET {{baseUrl}}/api/v1/perguntas/participante/69266189a9e74a0fc2694e60
+
+### PERGUNTAS - OBTER UMA PERGUNTA ESPECÍFICA
+GET {{baseUrl}}/api/v1/perguntas/COLE_ID_DA_PERGUNTA_AQUI
+
+### PERGUNTAS - CURTIR PERGUNTA
+PUT {{baseUrl}}/api/v1/perguntas/COLE_ID_DA_PERGUNTA_AQUI/curtir
+
+### PERGUNTAS - RESPONDER PERGUNTA
+PUT {{baseUrl}}/api/v1/perguntas/COLE_ID_DA_PERGUNTA_AQUI/responder
+Content-Type: application/json
+
+{
+  "resposta": "Você pode usar o pacote @react-native-firebase/app para integrar o Firebase. Primeiro instale as dependências e configure o projeto no console do Firebase.",
+  "palestranteNome": "Dr. Maria Santos"
+}
+
+### PERGUNTAS - DELETAR PERGUNTA
+DELETE {{baseUrl}}/api/v1/perguntas/COLE_ID_DA_PERGUNTA_AQUI
