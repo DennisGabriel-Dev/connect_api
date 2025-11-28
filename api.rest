@@ -29,7 +29,7 @@ GET {{baseUrl}}/api/v1/palestras?tipo=Workshop
 ### PARTICIPANTES - LISTAR TODOS USUARIOS
 GET {{baseUrl}}/api/v1/usuarios
 
-### QR CODE - REGISTRAR PRESENÇA
+### QR CODE - REGISTRAR PRESENÇA (POST)
 POST {{baseUrl}}/api/v1/presenca
 Content-Type: application/json
 
@@ -38,6 +38,9 @@ Content-Type: application/json
     "palestraId": "6926618aa9e74a0fc2694e63"
 }
 
+### QR CODE - REGISTRAR PRESENÇA VIA QR (GET - Simula escaneamento)
+GET {{baseUrl}}/api/v1/presenca/qr?participanteId=6929daa4e7c76f992b087cec&palestraId=6926618aa9e74a0fc2694e63
+
 ### QR CODE - LISTAR PRESENÇAS - Com o id do participante
 # GET {{baseUrl}}/api/v1/presenca/{participanteId}
-GET {{baseUrl}}/api/v1/presenca/69266189a9e74a0fc2694e61
+GET {{baseUrl}}/api/v1/presenca/6929daa4e7c76f992b087cec
