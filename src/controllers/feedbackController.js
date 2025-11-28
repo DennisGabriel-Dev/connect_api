@@ -8,7 +8,10 @@ export const criarFeedback = async (req, res) => {
       return res.status(400).json({ error: "Campos obrigatórios: participanteId, palestraId e estrelas." });
     }
 
-    // Impede duplicação (já existe no schema, mas tratamos o erro também)
+    if (estrelas < 1 || estrelas > 5) {
+      return res.status(400).json({ error: "Estrelas deve ser entre 1 e 5." });
+    }
+
     const existente = await prisma.feedback.findUnique({
       where: {
         participanteId_palestraId: {
@@ -27,11 +30,14 @@ export const criarFeedback = async (req, res) => {
         participanteId,
         palestraId,
         estrelas,
-        comentario
+        comentario: comentario || null
       }
     });
 
-    return res.status(201).json({ message: "Feedback enviado com sucesso!", feedback });
+    return res.status(201).json({ 
+      message: "Feedback enviado com sucesso!", 
+      feedback 
+    });
 
   } catch (error) {
     console.error(error);
@@ -39,11 +45,12 @@ export const criarFeedback = async (req, res) => {
   }
 };
 
-
 // Listar feedbacks de uma palestra
 export const listarFeedbacksDaPalestra = async (req, res) => {
   try {
     const { palestraId } = req.params;
+    
+    console.log('🔍 Buscando feedbacks para palestraId:', palestraId);
 
     const feedbacks = await prisma.feedback.findMany({
       where: { palestraId },
@@ -54,16 +61,20 @@ export const listarFeedbacksDaPalestra = async (req, res) => {
       }
     });
 
+    console.log('Feedbacks encontrados:', feedbacks.length);
+    
     return res.status(200).json(feedbacks);
 
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: "Erro ao buscar feedbacks." });
+    console.error("Erro detalhado ao buscar feedbacks:", error);
+    return res.status(500).json({ 
+      error: "Erro ao buscar feedbacks.",
+      details: error.message 
+    });
   }
 };
 
-
-// Feedbacks do usuário logado
+// FEEDBACKS DO USUÁRIO LOGADO
 export const listarFeedbacksDoUsuario = async (req, res) => {
   try {
     const { participanteId } = req.params;
