@@ -41,3 +41,14 @@ Content-Type: application/json
 ### QR CODE - LISTAR PRESENÇAS - Com o id do participante
 # GET {{baseUrl}}/api/v1/presenca/{participanteId}
 GET {{baseUrl}}/api/v1/presenca/69266189a9e74a0fc2694e61
+
+
+### QUIZ - LISTAR TODOS QUIZZES
+GET {{baseUrl}}/api/v1/quizzes
+### QUIZ - LISTAR QUIZZES LIBERADOS
+GET {{baseUrl}}/api/v1/quizzes/liberados
+### QUIZ - LISTAR QUIZ POR ID
+GET {{baseUrl}}/api/v1/quizzes/692a11a228139f134363b126
+### QUIZ - RESPONDER QUIZ
+# Adicionar no header x-participante-id o id do participante
+# POST {{baseUrl}}/api/v1/quizzes/responder/{quizId}

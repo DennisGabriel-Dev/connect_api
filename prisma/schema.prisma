@@ -82,3 +82,55 @@ model Feedback {
 
   @@map("feedbacks")
 }
+
+
+model Quiz {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+  titulo    String
+  descricao String?
+  liberado  Boolean @default(false)
+
+
+  perguntas PerguntaEmbed[]
+  tentativas Tentativa[]
+
+  @@map("quizzes")
+}
+
+// Embedded types para perguntas e opcoes dentro do Quiz
+type PerguntaEmbed {
+  id     String
+  texto  String
+  pontos Int @default(10)
+  opcoes OpcaoEmbed[]
+}
+
+type OpcaoEmbed {
+  id       String
+  texto    String
+  eCorreta Boolean @default(false)
+}
+
+model Pontuacao {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  participanteId String   @db.ObjectId
+  quizId         String?  @db.ObjectId
+  pontos         Int
+
+  @@map("pontuacoes")
+  @@index([participanteId])
+}
+
+model Tentativa {
+  id String   @id @default(auto()) @map("_id") @db.ObjectId
+  pontosObtidos Int
+  enviadoEm     DateTime @default(now())
+
+  participanteId String   @db.ObjectId
+
+  quizId    String   @db.ObjectId
+  quiz      Quiz     @relation(fields: [quizId], references: [id])
+
+  @@map("tentativas")
+  @@unique([participanteId, quizId])
+}
