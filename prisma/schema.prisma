@@ -7,57 +7,67 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Modelo para Login 
 model Participante {
-  id           String @id @default(auto()) @map("_id") @db.ObjectId
-  even3Id      Int    @unique // id_attendees da Even3
-  nome         String // name
-  email        String @unique
-  foto         String? // photo
-  senha        String? // password
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  even3Id      Int      @unique
+  nome         String
+  email        String   @unique
+  foto         String?
+  senha        String?
+  documento    String?
+  confirmado   Boolean  @default(false)
+  
+  presencas    Presenca[]?
+  feedbacks    Feedback[]?
   
   @@map("participantes")
 }
 
-// Modelo para eventos 
 model Palestra {
-  id          String   @id @default(auto()) @map("_id") @db.ObjectId
-  even3Id     Int      @unique // id_session da Even3
-  titulo      String   // title
-  descricao   String?  // description
-  tipo        String   // type 
-  local       String?  // venue
-  horarios    HorarioEmbed[] // aray para armazenar os dados de data e horario 
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  even3Id      Int      @unique
+  titulo       String
+  descricao    String?
+  tipo         String
+  local        String?
   
-  // No Mongo, podemos salvar os palestrantes dentro da palestra (Array de objetos)
-  palestrantes PalestranteEmbed[] 
+  horarios     Json
+  palestrantes Json
+  
+  presencas    Presenca[]?
+  feedbacks    Feedback[]?
   
   @@map("palestras")
 }
-type HorarioEmbed {
-  id_time    Int?
-  date_start String? 
-  date_end   String?
-}
 
-// Isso não é uma tabela, é um tipo de dado dentro da Palestra (funciona no Mongo eu acho kkkk)
-type PalestranteEmbed {
-  even3Id   Int     // id_speaker
-  nome      String  // name
-  foto      String? // photo
-  bio       String? // resume
-}
-
-// Modelo para registro de presença
 model Presenca {
-  id              String   @id @default(auto()) @map("_id") @db.ObjectId
-  participanteId  String   @db.ObjectId // ID do participante local
-  palestraId      String   @db.ObjectId // ID da palestra local
-  dataHora        DateTime @default(now()) // Quando marcou presença
-  sincronizado    Boolean  @default(false) // Se já foi enviado para Even3
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  participanteId String   @db.ObjectId
+  palestraId     String   @db.ObjectId
+  dataHora       DateTime @default(now())
+  sincronizado   Boolean  @default(false)
+  
+  // RELAÇÕES OPCIONAIS (não quebram código do QR Code)
+  participante Participante? @relation(fields: [participanteId], references: [id], onDelete: Cascade)
+  palestra     Palestra?     @relation(fields: [palestraId], references: [id], onDelete: Cascade)
   
   @@map("presencas")
-  @@unique([participanteId, palestraId]) // Um participante só pode marcar presença uma vez por palestra
+  @@unique([participanteId, palestraId])
+}
+
+model Feedback {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  participanteId String   @db.ObjectId
+  palestraId     String   @db.ObjectId
+  estrelas       Int
+  comentario     String?
+  data           DateTime @default(now())
+
+  participante Participante @relation(fields: [participanteId], references: [id], onDelete: Cascade)
+  palestra     Palestra     @relation(fields: [palestraId], references: [id], onDelete: Cascade)
+  
+  @@map("feedbacks")
+  @@unique([participanteId, palestraId])
 }
 
 // Modelo para perguntas e respostas nas palestras
