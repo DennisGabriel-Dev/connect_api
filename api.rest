@@ -41,3 +41,14 @@ Content-Type: application/json
 ### QR CODE - LISTAR PRESENÇAS - Com o id do participante
 # GET {{baseUrl}}/api/v1/presenca/{participanteId}
 GET {{baseUrl}}/api/v1/presenca/69266189a9e74a0fc2694e61
+
+### SORTEIO - ÚNICO ENDPOINT (resumo + detalhes + filtros)
+POST {{baseUrl}}/api/v1/sorteio/usuarios/all
+Content-Type: application/json
+
+{
+  "minFeedbacks": 0,
+  "minVotos": 0,
+  "minPresencas": 0,
+  "minQuizScore": 0
+}
