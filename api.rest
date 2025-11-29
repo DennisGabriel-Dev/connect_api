@@ -42,6 +42,18 @@ Content-Type: application/json
 # GET {{baseUrl}}/api/v1/presenca/{participanteId}
 GET {{baseUrl}}/api/v1/presenca/69266189a9e74a0fc2694e61
 
+### SORTEIO - ÚNICO ENDPOINT (resumo + detalhes + filtros)
+POST {{baseUrl}}/api/v1/sorteio/usuarios/all
+Content-Type: application/json
+
+{
+  "minFeedbacks": 0,
+  "minVotos": 0,
+  "minPresencas": 0,
+  "minQuizScore": 0
+}
+
+
 
 ### QUIZ - LISTAR TODOS QUIZZES
 GET {{baseUrl}}/api/v1/quizzes
