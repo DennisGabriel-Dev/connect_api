@@ -41,3 +41,6 @@ Content-Type: application/json
 ### QR CODE - LISTAR PRESENÇAS - Com o id do participante
 # GET {{baseUrl}}/api/v1/presenca/{participanteId}
 GET {{baseUrl}}/api/v1/presenca/69266189a9e74a0fc2694e61
+
+### PALESTRAS - LISTAR PALESTRAS POR PARTICIPANTE
+GET {{baseUrl}}/api/v1/palestras/participante/692a6649331f5e42f2e8412e
