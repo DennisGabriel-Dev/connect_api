@@ -8,6 +8,7 @@ import authRoutes from './routes/authRoutes.js';
 import palestrasRoutes from './routes/palestrasRoutes.js';
 import presencaRoutes from './routes/presencaRoutes.js';
 import feedbackRoutes from './routes/feedbackRoutes.js';
+import quizRoutes from './routes/quizRoutes.js';
 
 const app = express();
 const port = 5000;
@@ -23,6 +24,7 @@ app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/palestras', palestrasRoutes);
 app.use('/api/v1/presenca', presencaRoutes);
 app.use('/api/v1/feedback', feedbackRoutes);
+app.use('/api/v1/quizzes', quizRoutes);
 
 // Rota Raiz de Teste
 app.get('/', (req, res) => {
