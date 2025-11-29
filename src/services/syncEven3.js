@@ -7,7 +7,7 @@ const prisma = new PrismaClient();
 const EVEN3_TOKEN = process.env.EVEN3_TOKEN;
 
 async function syncDados() {
-  console.log("Sincronizando");
+  console.log("Sincronizando...");
 
   if (!EVEN3_TOKEN) {
     console.error("ERRO: Token não encontrado no .env");
@@ -24,8 +24,9 @@ async function syncDados() {
     for (const p of respParticipantes.data.data || []) {
       await prisma.participante.upsert({
         where: { even3Id: p.id_attendees },
-        update: { nome: p.name, email: p.email, foto: p.photo },
-        create: { even3Id: p.id_attendees, nome: p.name, email: p.email, foto: p.photo }
+        // CORREÇÃO: Removido 'foto: p.photo'
+        update: { nome: p.name, email: p.email },
+        create: { even3Id: p.id_attendees, nome: p.name, email: p.email }
       });
     }
     console.log(`Participantes sincronizados.`);
@@ -39,10 +40,7 @@ async function syncDados() {
     for (const s of respSessoes.data.data || []) {
       
       const horariosMapped = s.times ? s.times.map(t => {
-
-        // O campo 'date' vem como "2025-12-26T00:00:00".
         const dataApenas = t.date ? t.date.split('T')[0] : null; 
-        
         let inicioIso = null;
         let fimIso = null;
 
@@ -64,7 +62,7 @@ async function syncDados() {
       const speakersMapped = s.speakers ? s.speakers.map(sp => ({
         even3Id: sp.id_speaker,
         nome: sp.name,
-        foto: sp.photo,
+        // CORREÇÃO: Removido 'foto: sp.photo'
         bio: sp.resume
       })) : [];
 

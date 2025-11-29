@@ -87,3 +87,17 @@ Content-Type: application/json
 
 ### PERGUNTAS - DELETAR PERGUNTA
 DELETE {{baseUrl}}/api/v1/perguntas/COLE_ID_DA_PERGUNTA_AQUI
+
+
+### QUIZ - LISTAR TODOS QUIZZES
+GET {{baseUrl}}/api/v1/quizzes
+### QUIZ - LISTAR QUIZZES LIBERADOS
+GET {{baseUrl}}/api/v1/quizzes/liberados
+### QUIZ - LISTAR QUIZ POR ID
+GET {{baseUrl}}/api/v1/quizzes/692a11a228139f134363b126
+### QUIZ - RESPONDER QUIZ
+# Adicionar no header x-participante-id o id do participante
+# POST {{baseUrl}}/api/v1/quizzes/responder/{quizId}
+
+### PALESTRAS - LISTAR PALESTRAS POR PARTICIPANTE
+GET {{baseUrl}}/api/v1/palestras/participante/692a6649331f5e42f2e8412e
