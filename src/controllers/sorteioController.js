@@ -5,6 +5,7 @@ export async function getTudo(req, res) {
     const data = await getTudoService(req.body);
     res.json(data);
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    console.error('Erro no controller de sorteio:', err);
+    res.status(500).json({ error: err.message || 'Erro ao processar dados de sorteio' });
   }
 }

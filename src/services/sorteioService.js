@@ -41,18 +41,22 @@ export async function getTudoService({
       ? await prisma.pergunta.count({ where: { participanteId: p.id } })
       : 0;
 
+    // O modelo Pergunta tem 'curtidas' ao invés de 'votos'
     const votos = existePergunta
       ? (await prisma.pergunta.aggregate({
           where: { participanteId: p.id },
-          _sum: { votos: true }
-        }))?._sum?.votos ?? 0
+          _sum: { curtidas: true }
+        }))?._sum?.curtidas ?? 0
       : 0;
 
-    const scoreQuiz = existeQuiz
-      ? (await prisma.quiz.aggregate({
+    // O Quiz não tem relação direta com participante, precisa buscar através de Tentativa
+    // Verificar se a tabela Tentativa existe antes de usar
+    const existeTentativa = await tabelaExiste("tentativa");
+    const scoreQuiz = existeTentativa
+      ? (await prisma.tentativa.aggregate({
           where: { participanteId: p.id },
-          _sum: { score: true }
-        }))?._sum?.score ?? 0
+          _sum: { pontosObtidos: true }
+        }))?._sum?.pontosObtidos ?? 0
       : 0;
 
     const item = {
