@@ -111,16 +111,6 @@ type OpcaoEmbed {
   eCorreta Boolean @default(false)
 }
 
-model Pontuacao {
-  id             String   @id @default(auto()) @map("_id") @db.ObjectId
-  participanteId String   @db.ObjectId
-  quizId         String?  @db.ObjectId
-  pontos         Int
-
-  @@map("pontuacoes")
-  @@index([participanteId])
-}
-
 model Tentativa {
   id String   @id @default(auto()) @map("_id") @db.ObjectId
   pontosObtidos Int

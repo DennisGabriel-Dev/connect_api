@@ -101,7 +101,7 @@ const embaralharArray = (array) => {
  * Responder Quiz e Calcular Pontuação
  * - Verifica tentativa existente (composite unique participanteId_quizId)
  * - Usa embeds para validar perguntas/opcoes
- * - Cria Tentativa e Pontuacao (coleção separada) em transação
+ * - Cria Tentativa
  */
 export const responderQuiz = async (quizId, participanteId, respostas) => {
   // Verifica se o participante já respondeu
@@ -144,22 +144,13 @@ export const responderQuiz = async (quizId, participanteId, respostas) => {
   }
 
   // Cria tentativa e registra pontuação em transação
-  const [tentativa, pontuacao] = await prisma.$transaction([
-    prisma.tentativa.create({
-      data: {
-        participanteId,
-        quizId,
-        pontosObtidos: pontuacaoObtida,
-      },
-    }),
-    prisma.pontuacao.create({
-      data: {
-        participanteId,
-        quizId,
-        pontos: pontuacaoObtida,
-      },
-    })
-  ])
+  const tentativa = await prisma.tentativa.create({
+    data: {
+      participanteId,
+      quizId,
+      pontosObtidos: pontuacaoObtida,
+    }
+  })
 
-  return { tentativa, pontuacao, pontuacaoMaxima, detalhesRespostas }
+  return { tentativa, pontuacaoMaxima, detalhesRespostas }
 }
