@@ -31,9 +31,25 @@ export const listarQuizzesLiberados = async () => {
 
 // Busca quiz pelo id para o participante
 // Remove informação `eCorreta` das opções antes de retornar
-export const buscarQuizPorId = async (id) => {
+export const buscarQuizPorId = async (quizId, participanteId) => {
+
+  const tentativaExistente = await prisma.tentativa.findUnique({
+    where: {
+      participanteId_quizId: {
+        participanteId,
+        quizId,
+      },
+    },
+  })
+
+  if (tentativaExistente) {
+    throw new Error('O participante já respondeu a este quiz.')
+  }
+
   const quiz = await prisma.quiz.findUnique({
-    where: { id }
+    where:{
+      id: quizId
+    }
   })
 
   if (!quiz) return null
@@ -85,7 +101,7 @@ const embaralharArray = (array) => {
  * Responder Quiz e Calcular Pontuação
  * - Verifica tentativa existente (composite unique participanteId_quizId)
  * - Usa embeds para validar perguntas/opcoes
- * - Cria Tentativa e Pontuacao (coleção separada) em transação
+ * - Cria Tentativa
  */
 export const responderQuiz = async (quizId, participanteId, respostas) => {
   // Verifica se o participante já respondeu
@@ -128,22 +144,63 @@ export const responderQuiz = async (quizId, participanteId, respostas) => {
   }
 
   // Cria tentativa e registra pontuação em transação
-  const [tentativa, pontuacao] = await prisma.$transaction([
-    prisma.tentativa.create({
-      data: {
-        participanteId,
-        quizId,
-        pontosObtidos: pontuacaoObtida,
-      },
-    }),
-    prisma.pontuacao.create({
-      data: {
-        participanteId,
-        quizId,
-        pontos: pontuacaoObtida,
-      },
-    })
-  ])
+  const tentativa = await prisma.tentativa.create({
+    data: {
+      participanteId,
+      quizId,
+      pontosObtidos: pontuacaoObtida,
+    }
+  })
 
-  return { tentativa, pontuacao, pontuacaoMaxima, detalhesRespostas }
+  return { tentativa, pontuacaoMaxima, detalhesRespostas }
+}
+
+export const listarTodasTentativas = async () => {
+  const tentativas = await prisma.tentativa.findMany({
+    orderBy: { enviadoEm: 'desc' },
+    include: {
+      quiz: {
+        select: { titulo: true }
+      }
+    }
+  })
+
+  const idsParticipantes = [...new Set(tentativas.map(t => t.participanteId))]
+
+  const participantes = await prisma.participante.findMany({
+    where: {
+      id: { in: idsParticipantes}
+    },
+    select: {
+      id: true,
+      nome: true,
+      email: true
+    }
+  })
+
+  const mapParticipantes = {}
+  participantes.forEach(p => {
+    mapParticipantes[p.id] = p
+  })
+
+  const relatorio = tentativas.map(t => {
+    const participante = mapParticipantes[t.participanteId]
+
+    return {
+      tentativaId: t.id,
+      data: t.enviadoEm,
+      pontuacao: t.pontosObtidos,
+      participante: {
+        id: t.participanteId,
+        nome: participante ? participante.nome : "Participante Deletado ou não encontrado",
+        email: participante ? participante.email : "N/A"
+      },
+      quiz: {
+        id: t.quizId,
+        titulo: t.quiz ? t.quiz.titulo : "Quiz Deletado ou não encontrado"
+      }
+    }
+  })
+
+  return relatorio
 }
