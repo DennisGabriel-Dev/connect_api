@@ -78,3 +78,13 @@ export const responder = async (req, res) => {
     return res.status(500).json({ error: 'Erro ao processar respostas.', detalhes: error.message })
   }
 }
+
+export const listarTodasTentativas = async (req, res) => {
+  try {
+    const tentativas = await quizService.listarTodasTentativas()
+    return res.json(tentativas)
+  } catch (error) {
+    console.error(error)
+    return res.status(500).json({ error: 'Erro ao listar tentativas' })
+  }
+}

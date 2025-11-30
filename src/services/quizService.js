@@ -154,3 +154,53 @@ export const responderQuiz = async (quizId, participanteId, respostas) => {
 
   return { tentativa, pontuacaoMaxima, detalhesRespostas }
 }
+
+export const listarTodasTentativas = async () => {
+  const tentativas = await prisma.tentativa.findMany({
+    orderBy: { enviadoEm: 'desc' },
+    include: {
+      quiz: {
+        select: { titulo: true }
+      }
+    }
+  })
+
+  const idsParticipantes = [...new Set(tentativas.map(t => t.participanteId))]
+
+  const participantes = await prisma.participante.findMany({
+    where: {
+      id: { in: idsParticipantes}
+    },
+    select: {
+      id: true,
+      nome: true,
+      email: true
+    }
+  })
+
+  const mapParticipantes = {}
+  participantes.forEach(p => {
+    mapParticipantes[p.id] = p
+  })
+
+  const relatorio = tentativas.map(t => {
+    const participante = mapParticipantes[t.participanteId]
+
+    return {
+      tentativaId: t.id,
+      data: t.enviadoEm,
+      pontuacao: t.pontosObtidos,
+      participante: {
+        id: t.participanteId,
+        nome: participante ? participante.nome : "Participante Deletado ou não encontrado",
+        email: participante ? participante.email : "N/A"
+      },
+      quiz: {
+        id: t.quizId,
+        titulo: t.quiz ? t.quiz.titulo : "Quiz Deletado ou não encontrado"
+      }
+    }
+  })
+
+  return relatorio
+}
