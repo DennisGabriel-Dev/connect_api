@@ -17,8 +17,7 @@ const usuariosController = {
           id: true,
           nome: true,
           email: true,
-          even3Id: true,
-          foto: true
+          even3Id: true
         }
       });
       res.status(200).json(participantes);
