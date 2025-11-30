@@ -13,31 +13,7 @@ export const criarPergunta = async (req, res) => {
       });
     }
 
-    // Verificar se o participante existe
-    const participante = await prisma.participante.findUnique({
-      where: { id: participanteId }
-    });
-
-    if (!participante) {
-      return res.status(404).json({
-        success: false,
-        message: 'Participante não encontrado'
-      });
-    }
-
-    // Verificar se a palestra existe
-    const palestra = await prisma.palestra.findUnique({
-      where: { id: palestraId }
-    });
-
-    if (!palestra) {
-      return res.status(404).json({
-        success: false,
-        message: 'Palestra não encontrada'
-      });
-    }
-
-    // Criar a pergunta
+    // Criar a pergunta (sem validar se participante/palestra existem)
     const pergunta = await prisma.pergunta.create({
       data: {
         texto,
@@ -180,23 +156,11 @@ export const curtirPergunta = async (req, res) => {
   try {
     const { id } = req.params;
 
-    // Verificar se a pergunta existe
-    const perguntaExistente = await prisma.pergunta.findUnique({
-      where: { id }
-    });
-
-    if (!perguntaExistente) {
-      return res.status(404).json({
-        success: false,
-        message: 'Pergunta não encontrada'
-      });
-    }
-
-    // Incrementar o contador de curtidas
+    // Incrementar o contador de curtidas diretamente
     const pergunta = await prisma.pergunta.update({
       where: { id },
       data: {
-        curtidas: perguntaExistente.curtidas + 1
+        curtidas: { increment: 1 }
       }
     });
 
@@ -207,6 +171,15 @@ export const curtirPergunta = async (req, res) => {
     });
   } catch (error) {
     console.error('Erro ao curtir pergunta:', error);
+    
+    // Se a pergunta não existir, retorna erro específico
+    if (error.code === 'P2025') {
+      return res.status(404).json({
+        success: false,
+        message: 'Pergunta não encontrada'
+      });
+    }
+    
     res.status(500).json({
       success: false,
       message: 'Erro ao curtir pergunta',
