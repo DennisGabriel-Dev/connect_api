@@ -1,5 +1,4 @@
 import prisma from '../lib/prisma.js';
-import { registrarPresencaEven3 } from '../services/syncEven3.js';
 
 export const registrarPresenca = async (req, res) => {
   try {
@@ -12,27 +11,25 @@ export const registrarPresenca = async (req, res) => {
       });
     }
 
-    // 2. Buscar participante
+    // 2. Verificar se o participante existe
     const participante = await prisma.participante.findUnique({
       where: { id: participanteId }
     });
 
     if (!participante) {
-      return res.status(404).json({ 
-        error: "Participante não encontrado. Faça login novamente." 
-      });
+      return res.status(404).json({ error: "Participante não encontrado" });
     }
 
-    // 3. Buscar palestra/atividade
+    // 3. Verificar se a palestra existe
     const palestra = await prisma.palestra.findUnique({
       where: { id: palestraId }
     });
 
     if (!palestra) {
-      return res.status(404).json({ error: "Palestra/Atividade não encontrada" });
+      return res.status(404).json({ error: "Palestra não encontrada" });
     }
 
-    // 4. Registrar presença local primeiro
+    // 4. Registrar presença (upsert para evitar duplicatas)
     const presenca = await prisma.presenca.upsert({
       where: {
         participanteId_palestraId: {
@@ -51,50 +48,9 @@ export const registrarPresenca = async (req, res) => {
       }
     });
 
-    // 5. Tentar check-in no Even3 
-    console.log('Sincronizando presença com Even3...');
-    const resultadoEven3 = await registrarPresencaEven3(
-      participante.even3Id, 
-      palestra.even3Id,
-      palestra.tipo
-    );
-    console.log('Resultado Even3:', resultadoEven3);
-
-    // 6. Se Even3 rejeitou por falta de inscrição, deletar presença local
-    if (resultadoEven3.erro === 'NAO_INSCRITO') {
-      await prisma.presenca.delete({
-        where: { id: presenca.id }
-      });
-
-      return res.status(403).json({ 
-        error: `Participante não está inscrito neste ${palestra.tipo}`,
-        tipo: palestra.tipo,
-        titulo: palestra.titulo
-      });
-    }
-
-    // 7. Atualizar flag de sincronização se sucesso
-    if (resultadoEven3.sucesso) {
-      await prisma.presenca.update({
-        where: { id: presenca.id },
-        data: { sincronizado: true }
-      });
-    }
-
     return res.status(201).json({
       message: "Presença registrada com sucesso",
-      presenca: {
-        ...presenca,
-        sincronizado: resultadoEven3.sucesso
-      },
-      participante: {
-        nome: participante.nome,
-        email: participante.email
-      },
-      atividade: {
-        titulo: palestra.titulo,
-        tipo: palestra.tipo
-      }
+      presenca
     });
 
   } catch (error) {
@@ -157,16 +113,14 @@ export const registrarPresencaViaQr = async (req, res) => {
       return res.status(404).json({ error: "Participante não encontrado" });
     }
 
-    // Buscar palestra/atividade
     const palestra = await prisma.palestra.findUnique({
       where: { id: palestraId }
     });
 
     if (!palestra) {
-      return res.status(404).json({ error: "Palestra/Atividade não encontrada" });
+      return res.status(404).json({ error: "Palestra não encontrada" });
     }
 
-    // Registrar presença local primeiro
     const presenca = await prisma.presenca.upsert({
       where: {
         participanteId_palestraId: {
@@ -185,37 +139,9 @@ export const registrarPresencaViaQr = async (req, res) => {
       }
     });
 
-    // Tentar check-in no Even3 
-    console.log('Sincronizando presença com Even3 (via QR)...');
-    const resultadoEven3 = await registrarPresencaEven3(
-      participante.even3Id, 
-      palestra.even3Id,
-      palestra.tipo
-    );
-    console.log('Resultado Even3:', resultadoEven3);
-
-    // Atualizar flag de sincronização se sucesso
-    if (resultadoEven3.sucesso) {
-      await prisma.presenca.update({
-        where: { id: presenca.id },
-        data: { sincronizado: true }
-      });
-    }
-
     return res.status(201).json({
       message: "Presença registrada com sucesso",
-      presenca: {
-        ...presenca,
-        sincronizado: resultadoEven3.sucesso
-      },
-      participante: {
-        nome: participante.nome,
-        email: participante.email
-      },
-      atividade: {
-        titulo: palestra.titulo,
-        tipo: palestra.tipo
-      }
+      presenca
     });
 
   } catch (error) {
