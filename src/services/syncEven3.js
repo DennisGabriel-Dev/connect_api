@@ -123,13 +123,11 @@ export async function buscarParticipanteEven3PorEmail(email) {
       update: {
         nome: participanteEven3.name,
         email: participanteEven3.email,
-        foto: participanteEven3.photo
       },
       create: {
         even3Id: participanteEven3.id_attendees,
         nome: participanteEven3.name,
         email: participanteEven3.email,
-        foto: participanteEven3.photo
       }
     });
 
