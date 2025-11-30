@@ -109,7 +109,22 @@ export const listarPresencas = async (req, res) => {
     const { participanteId } = req.params;
 
     const presencas = await prisma.presenca.findMany({
-      where: { participanteId }
+      where: { participanteId },
+      include: {
+        palestra: {
+          select: {
+            id: true,
+            titulo: true,
+            tipo: true,
+            local: true,
+            horarios: true,
+            palestrantes: true
+          }
+        }
+      },
+      orderBy: {
+        dataHora: 'desc'
+      }
     });
 
     return res.status(200).json(presencas);

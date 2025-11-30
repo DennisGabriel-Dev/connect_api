@@ -44,3 +44,29 @@ GET {{baseUrl}}/api/v1/presenca/qr?participanteId=6929daa4e7c76f992b087cec&pales
 ### QR CODE - LISTAR PRESENÇAS - Com o id do participante
 # GET {{baseUrl}}/api/v1/presenca/{participanteId}
 GET {{baseUrl}}/api/v1/presenca/6929daa4e7c76f992b087cec
+
+### SORTEIO - ÚNICO ENDPOINT (resumo + detalhes + filtros)
+POST {{baseUrl}}/api/v1/sorteio/usuarios/all
+Content-Type: application/json
+
+{
+  "minFeedbacks": 0,
+  "minVotos": 0,
+  "minPresencas": 0,
+  "minQuizScore": 0
+}
+
+
+
+### QUIZ - LISTAR TODOS QUIZZES
+GET {{baseUrl}}/api/v1/quizzes
+### QUIZ - LISTAR QUIZZES LIBERADOS
+GET {{baseUrl}}/api/v1/quizzes/liberados
+### QUIZ - LISTAR QUIZ POR ID
+GET {{baseUrl}}/api/v1/quizzes/692a11a228139f134363b126
+### QUIZ - RESPONDER QUIZ
+# Adicionar no header x-participante-id o id do participante
+# POST {{baseUrl}}/api/v1/quizzes/responder/{quizId}
+
+### PALESTRAS - LISTAR PALESTRAS POR PARTICIPANTE
+GET {{baseUrl}}/api/v1/palestras/participante/692a6649331f5e42f2e8412e
