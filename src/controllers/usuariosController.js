@@ -1,4 +1,4 @@
-import prisma from '../lib/prisma.js';
+import prisma from "../lib/prisma.js";
 
 const usuariosController = {
   async create(req, res) {
@@ -17,8 +17,8 @@ const usuariosController = {
           id: true,
           nome: true,
           email: true,
-          even3Id: true
-        }
+          even3Id: true,
+        },
       });
       res.status(200).json(participantes);
     } catch (error) {
