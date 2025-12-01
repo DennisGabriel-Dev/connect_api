@@ -14,7 +14,7 @@ export const listarQuizzes = async () => {
   return quizzes
 }
 
-export const listarQuizzesLiberados = async () => {
+export const listarQuizzesLiberados = async (participanteId) => {
   const quizzes = await prisma.quiz.findMany({
     where: { liberado: true },
     select: {
@@ -26,7 +26,27 @@ export const listarQuizzesLiberados = async () => {
     }
   })
 
-  return quizzes
+  if (!participanteId) {
+    return quizzes.map(q => ({ ...q, jaRespondeu: false }))
+  }
+
+  const tentativas = await prisma.tentativa.findMany({
+    where: {
+      participanteId: participanteId
+    },
+    select: {
+      quizId: true
+    }
+  })
+
+  const idsRespondidos = new Set(tentativas.map(t => t.quizId))
+
+  const quizzesComStatus = quizzes.map(quiz => ({
+    ...quiz,
+    jaRespondeu: idsRespondidos.has(quiz.id)
+  }))
+
+  return quizzesComStatus
 }
 
 // Busca quiz pelo id para o participante

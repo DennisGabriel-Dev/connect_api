@@ -12,7 +12,9 @@ export const listarTodos = async (req, res) => {
 
 export const listarLiberados = async (req, res) => {
   try {
-    const quizzesLiberados = await quizService.listarQuizzesLiberados()
+    const participanteId = req.user?.id ?? req.headers['x-participante-id']
+
+    const quizzesLiberados = await quizService.listarQuizzesLiberados(participanteId)
     return res.json(quizzesLiberados)
   } catch (error) {
     console.error(error)
