@@ -1,5 +1,6 @@
 import prisma from '../lib/prisma.js'; 
 import bcrypt from 'bcryptjs';
+import { buscarParticipanteEven3PorEmail } from '../services/syncEven3.js';
 
 // Rota de Cadastro de Senha 
 export const cadastrarSenha = async (req, res) => {
@@ -11,12 +12,20 @@ export const cadastrarSenha = async (req, res) => {
     }
 
     // 1. Verifica se o usuário existe na base (veio do Even3)
-    const usuario = await prisma.participante.findUnique({
+    let usuario = await prisma.participante.findUnique({
       where: { email: email }
     });
 
+    // Se não existe localmente, tenta buscar no Even3 e sincronizar
     if (!usuario) {
-      return res.status(401).json({ error: "Este e-mail não está inscrito no evento." });
+      console.log(`Participante ${email} não encontrado localmente. Buscando no Even3...`);
+      usuario = await buscarParticipanteEven3PorEmail(email);
+      
+      if (!usuario) {
+        return res.status(401).json({ error: "Este e-mail não está inscrito no evento." });
+      }
+      
+      console.log(`Participante ${email} sincronizado do Even3`);
     }
 
     // 2. Verifica se ele já tem senha (já fez o cadastro antes)
@@ -52,15 +61,23 @@ export const login = async (req, res) => {
     }
 
     // 1. Busca usuário
-    const usuario = await prisma.participante.findUnique({
+    let usuario = await prisma.participante.findUnique({
       where: { email: email }
     });
 
-    // 2. Se não existe ou não tem senha cadastrada
+    // Se não existe localmente, tenta buscar no Even3 e sincronizar
     if (!usuario) {
-      return res.status(401).json({ error: "Usuário não encontrado." });
+      console.log(`Participante ${email} não encontrado localmente. Buscando no Even3...`);
+      usuario = await buscarParticipanteEven3PorEmail(email);
+      
+      if (!usuario) {
+        return res.status(401).json({ error: "Usuário não encontrado." });
+      }
+      
+      console.log(`Participante ${email} sincronizado do Even3`);
     }
 
+    // 2. Se não tem senha cadastrada
     if (!usuario.senha) {
       return res.status(403).json({ 
         error: "Primeiro acesso detectado.", 
