@@ -71,3 +71,23 @@ export const listarPalestrasPorParticipante = async (req, res) => {
     return res.status(500).json({ error: "Erro ao buscar palestras do participante." });
   }
 };
+
+  // Endpoint: Buscar quiz vinculado à palestra
+  export const obterQuizDaPalestra = async (req, res) => {
+    try {
+      const { id } = req.params;
+      if (!id) {
+        return res.status(400).json({ error: 'palestraId é obrigatório' });
+      }
+      const quiz = await prisma.quiz.findFirst({
+        where: { palestraId: id },
+      });
+      if (!quiz) {
+        return res.status(404).json({ error: 'Quiz não encontrado para esta palestra.' });
+      }
+      return res.status(200).json(quiz);
+    } catch (error) {
+      console.error('Erro ao buscar quiz da palestra:', error);
+      return res.status(500).json({ error: 'Erro ao buscar quiz da palestra.' });
+    }
+  };

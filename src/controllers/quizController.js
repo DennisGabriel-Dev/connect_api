@@ -69,3 +69,21 @@ export const responder = async (req, res) => {
     return res.status(500).json({ error: 'Erro ao processar respostas.', detalhes: error.message })
   }
 }
+
+// export const criarQuiz = async (req, res) => {
+//   const { titulo, palestraId, perguntas } = req.body;
+
+//   // Validação básica de entrada
+//   if (!titulo || !palestraId || !perguntas || !Array.isArray(perguntas) || perguntas.length === 0) {
+//     return res.status(400).json({ message: 'Título, palestraId e ao menos uma pergunta são obrigatórios.' });
+//   }
+
+//   try {
+//     const novoQuiz = await quizService.criarQuiz(req.body);
+//     return res.status(201).json(novoQuiz);
+//   } catch (error) {
+//     console.error('Erro ao criar quiz:', error);
+//     const statusCode = error.statusCode || 500;
+//     return res.status(statusCode).json({ error: error.message || 'Erro interno ao criar o quiz.' });
+//   }
+// };

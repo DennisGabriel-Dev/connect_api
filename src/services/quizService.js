@@ -1,4 +1,5 @@
 import prisma from '../lib/prisma.js'
+import crypto from 'crypto';
 
 export const listarQuizzes = async () => {
   const quizzes = await prisma.quiz.findMany({
@@ -147,3 +148,44 @@ export const responderQuiz = async (quizId, participanteId, respostas) => {
 
   return { tentativa, pontuacao, pontuacaoMaxima, detalhesRespostas }
 }
+
+// export const criarQuiz = async (dadosQuiz) => {
+//   const { titulo, descricao, liberado, perguntas, palestraId } = dadosQuiz;
+
+//   // 1. Valida se a palestra associada existe
+//   const palestraExistente = await prisma.palestra.findUnique({
+//     where: { id: palestraId },
+//   });
+
+//   if (!palestraExistente) {
+//     const error = new Error('Palestra não encontrada.');
+//     error.statusCode = 404;
+//     throw error;
+//   }
+
+//   // 2. Cria o quiz e suas perguntas/opções aninhadas
+//   const novoQuiz = await prisma.quiz.create({
+//     data: {
+//       titulo,
+//       descricao,
+//       liberado,
+//       palestra: {
+//         connect: { id: palestraId },
+//       },
+//       // Correção: Para documentos embutidos (composite types) no MongoDB,
+//       // usamos 'set' para definir o array de objetos diretamente.
+//       perguntas: perguntas.map(pergunta => ({
+//         id: crypto.randomBytes(12).toString('hex'), // Gera um ID para a pergunta
+//         texto: pergunta.texto,
+//         pontos: pergunta.pontos,
+//         opcoes: pergunta.opcoes.map(opcao => ({
+//           id: crypto.randomBytes(12).toString('hex'), // Gera um ID para a opção
+//           texto: opcao.texto,
+//           eCorreta: opcao.eCorreta,
+//         })),
+//       })),
+//     },
+//   });
+
+//   return novoQuiz;
+// };

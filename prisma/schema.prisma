@@ -37,6 +37,8 @@ model Palestra {
   // CORREÇÃO AQUI: Sem '?'
   presencas    Presenca[]
   feedbacks    Feedback[]
+
+  quizzes    Quiz[]
   
   @@map("palestras")
 }
@@ -93,6 +95,9 @@ model Quiz {
 
   perguntas PerguntaEmbed[]
   tentativas Tentativa[]
+
+  palestraId String? @db.ObjectId
+  palestra   Palestra? @relation(fields: [palestraId], references: [id])
 
   @@map("quizzes")
 }
