@@ -71,8 +71,8 @@ model Presenca {
 
 model Feedback {
   id              String   @id @default(auto()) @map("_id") @db.ObjectId
-  comentario      String
-  nota            Int
+  comentario      String?
+  estrelas        Int
   
   participanteId  String   @db.ObjectId
   participante    Participante @relation(fields: [participanteId], references: [id])
@@ -81,6 +81,7 @@ model Feedback {
   palestra        Palestra @relation(fields: [palestraId], references: [id])
 
   @@map("feedbacks")
+  @@unique([participanteId, palestraId])
 }
 
 
