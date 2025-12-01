@@ -43,13 +43,11 @@ export const buscarQuizPorId = async (quizId, participanteId) => {
   })
 
   if (tentativaExistente) {
-    throw new Error('O participante já respondeu a este quiz.')
+    throw new Error('Você já respondeu a este quiz.')
   }
 
   const quiz = await prisma.quiz.findUnique({
-    where:{
-      id: quizId
-    }
+    where: { id: quizId }
   })
 
   if (!quiz) return null
