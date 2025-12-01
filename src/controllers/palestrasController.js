@@ -76,16 +76,37 @@ export const listarPalestrasPorParticipante = async (req, res) => {
   export const obterQuizDaPalestra = async (req, res) => {
     try {
       const { id } = req.params;
+
+      const participanteId = req.headers['x-participante-id'];
+
       if (!id) {
         return res.status(400).json({ error: 'palestraId é obrigatório' });
       }
+
       const quiz = await prisma.quiz.findFirst({
         where: { palestraId: id },
       });
+
       if (!quiz) {
         return res.status(404).json({ error: 'Quiz não encontrado para esta palestra.' });
       }
-      return res.status(200).json(quiz);
+
+      let jaRespondeu = false;
+
+      if (participanteId) {
+        const tentativa = await prisma.tentativa.findUnique({
+          where: {
+            participanteId_quizId: {
+              participanteId: participanteId,
+              quizId: quiz.id
+            }
+          }
+        });
+
+        jaRespondeu = !!tentativa; 
+      }
+
+      return res.status(200).json({ ...quiz, jaRespondeu: jaRespondeu});
     } catch (error) {
       console.error('Erro ao buscar quiz da palestra:', error);
       return res.status(500).json({ error: 'Erro ao buscar quiz da palestra.' });

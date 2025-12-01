@@ -32,7 +32,21 @@ export const listarQuizzesLiberados = async () => {
 
 // Busca quiz pelo id para o participante
 // Remove informação `eCorreta` das opções antes de retornar
-export const buscarQuizPorId = async (id) => {
+export const buscarQuizPorId = async (id, participanteId) => {
+
+  const tentativaExistente = await prisma.tentativa.findUnique({
+    where: {
+      participanteId_quizId: {
+        participanteId,
+        quizId: id,
+      },
+    },
+  })
+
+  if (tentativaExistente) {
+    throw new Error('Você já respondeu a este quiz.')
+  }
+
   const quiz = await prisma.quiz.findUnique({
     where: { id }
   })
