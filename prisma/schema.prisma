@@ -97,8 +97,8 @@ model Quiz {
   perguntas PerguntaEmbed[]
   tentativas Tentativa[]
 
-  palestraId String? @db.ObjectId
-  palestra   Palestra? @relation(fields: [palestraId], references: [id])
+  palestraId String @db.ObjectId
+  palestra   Palestra @relation(fields: [palestraId], references: [id])
 
   @@map("quizzes")
 }

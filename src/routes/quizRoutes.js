@@ -1,5 +1,5 @@
 import express from 'express'
-import { listarTodos, listarLiberados, buscarPorId, responder, criarQuiz } from '../controllers/quizController.js'
+import { listarTodos, listarLiberados, buscarPorId, responder} from '../controllers/quizController.js'
 
 const router = express.Router()
 
