@@ -96,6 +96,37 @@ const embaralharArray = (array) => {
   return novoArray;
 }
 
+export const buscarQuizzesRespondidosPorParticipante = async (participanteId) => {
+
+  const tentativas = await prisma.tentativa.findMany({
+    where: {
+      participanteId: participanteId
+    },
+    orderBy: {
+      enviadoEm: 'desc'
+    },
+    include:{
+      quiz:{
+        select:{
+          id: true,
+          titulo: true,
+          descricao: true,
+          palestraId: true
+        }
+      }
+    }
+  })
+
+  return tentativas.map(tentativa => ({
+    tentativaId: tentativa.id,
+    quizId: tentativa.quiz.id,
+    titulo: tentativa.quiz.titulo,
+    descricao: tentativa.quiz.descricao,
+    pontos: tentativa.pontosObtidos
+  }))
+  
+}
+
 /**
  * Responder Quiz e Calcular Pontuação
  * - Verifica tentativa existente (composite unique participanteId_quizId)
