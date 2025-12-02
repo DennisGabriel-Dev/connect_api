@@ -56,7 +56,7 @@ export const buscarPorIdParticipante = async (req, res) => {
     const participanteId = req.params.id
 
     if (!participanteId) {
-      return res.status(401).json({ error: 'Usuário não autenticado. Faça login para responder o quiz.' })
+      return res.status(401).json({ error: 'ID do participante é obrigatório.' })
     }
 
     const quizzes = await quizService.buscarQuizzesRespondidosPorParticipante(participanteId)
@@ -64,6 +64,22 @@ export const buscarPorIdParticipante = async (req, res) => {
     return res.status(200).json(quizzes)
   } catch (error) {
     return res.status(500).json({ error: 'Erro ao buscar quizzes respondidos.' })
+  }
+}
+
+export const listarComStatus = async (req, res) => {
+  try {
+    const participanteId = req.user?.id ?? req.headers['x-participante-id']
+
+    if (!participanteId) {
+      return res.status(401).json({ error: 'Usuário não autenticado. Faça login para responder o quiz.' })
+    }
+
+    const lista = await quizService.listarStatusQuizzes(participanteId)
+
+    return res.status(200).json(lista)
+  } catch (error) {
+    return res.status(500).json({ error: 'Erro ao listar quizzes com status.' })
   }
 }
 
