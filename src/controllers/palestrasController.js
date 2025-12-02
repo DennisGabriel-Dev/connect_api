@@ -92,6 +92,7 @@ export const listarPalestrasPorParticipante = async (req, res) => {
       }
 
       let jaRespondeu = false;
+      let presencaConfirmada = false;
 
       if (participanteId) {
         const tentativa = await prisma.tentativa.findUnique({
@@ -102,11 +103,21 @@ export const listarPalestrasPorParticipante = async (req, res) => {
             }
           }
         });
-
         jaRespondeu = !!tentativa; 
+
+        const presenca = await prisma.presenca.findUnique({
+          where:{
+            participanteId_palestraId: {
+              participanteId: participanteId,
+              palestraId: id
+            }
+          }
+        })
+        presencaConfirmada = !!presenca;
+
       }
 
-      return res.status(200).json({ ...quiz, jaRespondeu: jaRespondeu});
+      return res.status(200).json({ ...quiz, jaRespondeu: jaRespondeu, presencaConfirmada: presencaConfirmada});
     } catch (error) {
       console.error('Erro ao buscar quiz da palestra:', error);
       return res.status(500).json({ error: 'Erro ao buscar quiz da palestra.' });
