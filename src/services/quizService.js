@@ -96,6 +96,89 @@ const embaralharArray = (array) => {
   return novoArray;
 }
 
+export const buscarQuizzesRespondidosPorParticipante = async (participanteId) => {
+
+  const tentativas = await prisma.tentativa.findMany({
+    where: {
+      participanteId: participanteId
+    },
+    orderBy: {
+      enviadoEm: 'desc'
+    },
+    include:{
+      quiz:{
+        select:{
+          id: true,
+          titulo: true,
+          descricao: true,
+          palestraId: true
+        }
+      }
+    }
+  })
+
+  return tentativas.map(tentativa => ({
+    tentativaId: tentativa.id,
+    quizId: tentativa.quiz.id,
+    titulo: tentativa.quiz.titulo,
+    descricao: tentativa.quiz.descricao,
+    pontos: tentativa.pontosObtidos
+  }))
+  
+}
+
+export const listarStatusQuizzes = async (participanteId) => {
+  const quizzes = await prisma.quiz.findMany({
+    where:{
+      liberado: true
+    },
+    include:{
+      tentativas:{
+        where:{
+          participanteId: participanteId
+        },
+        take: 1
+      },
+      palestra: {
+        select:{
+          id: true,
+          titulo: true
+        }
+      }
+    }
+  })
+
+  const resultado = quizzes.map(quiz => {
+    const tentativa = quiz.tentativas[0]
+
+    if (tentativa) {
+      return {
+        id: quiz.id,
+        titulo: quiz.titulo,
+        descricao: quiz.descricao,
+        palestraId: quiz.palestra.id,
+        palestraTitulo: quiz.palestra.titulo,
+        status: 'RESPONDIDO',
+        pontuacao: tentativa.pontosObtidos,
+        dataResposta: tentativa.enviadoEm
+      }
+    } else {
+      return {
+        id: quiz.id,
+        titulo: quiz.titulo,
+        descricao: quiz.descricao,
+        palestraId: quiz.palestra.id,
+        palestraTitulo: quiz.palestra.titulo,
+        status: 'PENDENTE',
+        pontuacao: null,
+        dataResposta: null
+      }
+    }
+  })
+
+  return resultado
+}
+
 /**
  * Responder Quiz e Calcular Pontuação
  * - Verifica tentativa existente (composite unique participanteId_quizId)
