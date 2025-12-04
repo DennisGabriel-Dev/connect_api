@@ -95,9 +95,19 @@ export const login = async (req, res) => {
     // 4. Sucesso! (Remove a senha do objeto de retorno por segurança)
     const { senha: _, ...dadosUsuario } = usuario;
 
+    // role sempre existirá
+    const role = dadosUsuario.role || 'user';
+
     return res.status(200).json({
       message: "Login realizado com sucesso!",
-      usuario: dadosUsuario
+      usuario: {
+        id: dadosUsuario.id,
+        even3Id: dadosUsuario.even3Id,
+        nome: dadosUsuario.nome,
+        email: dadosUsuario.email,
+        role,                      
+        isAdmin: role === 'admin', // campo derivado para facilitar no front
+      }
     });
 
   } catch (error) {

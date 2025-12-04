@@ -14,11 +14,11 @@ async function atualizarRole() {
     });
 
     if (!usuario) {
-      console.error(`❌ Usuário com email ${email} não encontrado!`);
+      console.error(` Usuário com email ${email} não encontrado!`);
       process.exit(1);
     }
 
-    console.log(`✅ Usuário encontrado: ${usuario.nome}`);
+    console.log(` Usuário encontrado: ${usuario.nome}`);
     console.log(`   Role atual: ${usuario.role || 'não definido'}`);
 
     // Atualiza o role
@@ -27,13 +27,13 @@ async function atualizarRole() {
       data: { role: novoRole }
     });
 
-    console.log(`\n✅ Role atualizado com sucesso!`);
+    console.log(`\nRole atualizado com sucesso!`);
     console.log(`   Novo role: ${usuarioAtualizado.role}`);
     console.log(`   Email: ${usuarioAtualizado.email}`);
     console.log(`   Nome: ${usuarioAtualizado.nome}`);
 
   } catch (error) {
-    console.error('❌ Erro ao atualizar role:', error);
+    console.error(' Erro ao atualizar role:', error);
     process.exit(1);
   } finally {
     await prisma.$disconnect();
