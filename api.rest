@@ -65,6 +65,12 @@ GET {{baseUrl}}/api/v1/quizzes/liberados
 ### QUIZ - LISTAR QUIZ POR ID
 GET {{baseUrl}}/api/v1/quizzes/692a11a228139f134363b126
 
+### QUIZ - LISTAR STATUS POR PARTICIPANTE
+# Adicionar no header x-participante-id o id do participante
+GET {{baseUrl}}/api/v1/quizzes/participante/status
+x-participante-id: 69266189a9e74a0fc2694e60
+
+
 ### QUIZ - CRIAR NOVO QUIZ (com palestraId)
 # POST {{baseUrl}}/api/v1/quizzes
 # Content-Type: application/json
