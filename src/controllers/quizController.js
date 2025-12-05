@@ -23,8 +23,13 @@ export const listarLiberados = async (req, res) => {
 export const buscarPorId = async (req, res) => {
   try {
     const { id } = req.params
+    const participanteId = req.user?.id ?? req.headers['x-participante-id']
 
-    const quiz = await quizService.buscarQuizPorId(id)
+    if (!participanteId) {
+      return res.status(401).json({ error: 'Usuário não autenticado. Faça login para responder o quiz.' })
+    }
+
+    const quiz = await quizService.buscarQuizPorId(id, participanteId)
 
     if (!quiz) {
       return res.status(404).json({ error: 'Quiz não encontrado' })
@@ -36,8 +41,45 @@ export const buscarPorId = async (req, res) => {
 
     return res.json(quiz)
   } catch (error) {
+
+    if (error.message === 'Você já respondeu a este quiz.') {
+       return res.status(403).json({ error: error.message })
+    }
+
     console.error(error)
     return res.status(500).json({ error: 'Erro ao buscar quiz' })
+  }
+}
+
+export const buscarPorIdParticipante = async (req, res) => {
+  try {
+    const participanteId = req.params.id
+
+    if (!participanteId) {
+      return res.status(401).json({ error: 'ID do participante é obrigatório.' })
+    }
+
+    const quizzes = await quizService.buscarQuizzesRespondidosPorParticipante(participanteId)
+    
+    return res.status(200).json(quizzes)
+  } catch (error) {
+    return res.status(500).json({ error: 'Erro ao buscar quizzes respondidos.' })
+  }
+}
+
+export const listarComStatus = async (req, res) => {
+  try {
+    const participanteId = req.user?.id ?? req.headers['x-participante-id']
+
+    if (!participanteId) {
+      return res.status(401).json({ error: 'Usuário não autenticado. Faça login para responder o quiz.' })
+    }
+
+    const lista = await quizService.listarStatusQuizzes(participanteId)
+
+    return res.status(200).json(lista)
+  } catch (error) {
+    return res.status(500).json({ error: 'Erro ao listar quizzes com status.' })
   }
 }
 
@@ -69,3 +111,21 @@ export const responder = async (req, res) => {
     return res.status(500).json({ error: 'Erro ao processar respostas.', detalhes: error.message })
   }
 }
+
+export const criarQuiz = async (req, res) => {
+  const { titulo, palestraId, perguntas } = req.body;
+
+  // Validação básica de entrada
+  if (!titulo || !palestraId || !perguntas || !Array.isArray(perguntas) || perguntas.length === 0) {
+    return res.status(400).json({ message: 'Título, palestraId e ao menos uma pergunta são obrigatórios.' });
+  }
+
+  try {
+    const novoQuiz = await quizService.criarQuiz(req.body);
+    return res.status(201).json(novoQuiz);
+  } catch (error) {
+    console.error('Erro ao criar quiz:', error);
+    const statusCode = error.statusCode || 500;
+    return res.status(statusCode).json({ error: error.message || 'Erro interno ao criar o quiz.' });
+  }
+};
