@@ -107,6 +107,7 @@ export const login = async (req, res) => {
         email: dadosUsuario.email,
         role,                      
         isAdmin: role === 'admin', // campo derivado para facilitar no front
+        perfilCompleto: dadosUsuario.perfilCompleto // retorna se o perfil foi completado, se respondeu o formulario
       }
     });
 
