@@ -16,6 +16,11 @@ model Participante {
   email        String @unique
   senha        String? 
   role         String @default("user") // "user" ou "admin"
+
+  // Campos de perfil pós-cadastro
+  tipoUsuario     String? // "publico_externo", "docente", "discente"
+  turma           String? // Preenchido apenas se tipoUsuario == "discente"
+  perfilCompleto  Boolean @default(false)
   
   // CORREÇÃO AQUI: 
   presencas    Presenca[]
