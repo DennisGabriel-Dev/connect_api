@@ -1,0 +1,147 @@
+### ========================================
+### 🎯 API DE PERGUNTAS - TESTES
+### ========================================
+
+@baseUrl = http://localhost:5000/api/v1
+@palestraId = 64abc123def456789
+@participanteId = 64abc123
+@perguntaId = 64xyz789abc123def
+
+### ========================================
+### 📝 USUÁRIOS - Criar/Listar Perguntas
+### ========================================
+
+### 1. Criar Nova Pergunta
+POST {{baseUrl}}/perguntas
+Content-Type: application/json
+
+{
+  "texto": "Como otimizar consultas no MongoDB?",
+  "participanteId": "{{participanteId}}",
+  "palestraId": "{{palestraId}}"
+}
+
+### 2. Listar Perguntas Aprovadas de uma Palestra
+GET {{baseUrl}}/perguntas/palestra/{{palestraId}}
+
+### ========================================
+### ❤️ CURTIDAS
+### ========================================
+
+### 3. Curtir uma Pergunta
+POST {{baseUrl}}/perguntas/{{perguntaId}}/curtir
+Content-Type: application/json
+
+{
+  "participanteId": "{{participanteId}}"
+}
+
+### 4. Descurtir uma Pergunta (mesma requisição)
+POST {{baseUrl}}/perguntas/{{perguntaId}}/curtir
+Content-Type: application/json
+
+{
+  "participanteId": "{{participanteId}}"
+}
+
+### 5. Obter Curtidas de um Participante
+GET {{baseUrl}}/perguntas/curtidas/{{participanteId}}
+
+### ========================================
+### 🔐 ADMIN - Moderação
+### ========================================
+
+### 6. Listar Todas as Perguntas Pendentes
+GET {{baseUrl}}/perguntas/admin/todas?status=pendente
+
+### 7. Listar Todas as Perguntas de uma Palestra (todos os status)
+GET {{baseUrl}}/perguntas/admin/todas?palestraId={{palestraId}}
+
+### 8. Listar Apenas Aprovadas
+GET {{baseUrl}}/perguntas/admin/todas?status=aprovada
+
+### 9. Listar Apenas Rejeitadas
+GET {{baseUrl}}/perguntas/admin/todas?status=rejeitada
+
+### 10. Aprovar uma Pergunta
+PATCH {{baseUrl}}/perguntas/{{perguntaId}}/aprovar
+
+### 11. Rejeitar uma Pergunta
+PATCH {{baseUrl}}/perguntas/{{perguntaId}}/rejeitar
+
+### 12. Deletar uma Pergunta
+DELETE {{baseUrl}}/perguntas/{{perguntaId}}
+Content-Type: application/json
+
+{
+  "participanteId": "{{participanteId}}"
+}
+
+### ========================================
+### 🧪 TESTES DE VALIDAÇÃO
+### ========================================
+
+### 13. Erro: Criar pergunta sem texto
+POST {{baseUrl}}/perguntas
+Content-Type: application/json
+
+{
+  "participanteId": "{{participanteId}}",
+  "palestraId": "{{palestraId}}"
+}
+
+### 14. Erro: Curtir sem participanteId
+POST {{baseUrl}}/perguntas/{{perguntaId}}/curtir
+Content-Type: application/json
+
+{}
+
+### 15. Erro: Curtir pergunta inexistente
+POST {{baseUrl}}/perguntas/999999999999999999999999/curtir
+Content-Type: application/json
+
+{
+  "participanteId": "{{participanteId}}"
+}
+
+### ========================================
+### 📊 FLUXO COMPLETO DE TESTE
+### ========================================
+
+### PASSO 1: Criar uma nova pergunta
+POST {{baseUrl}}/perguntas
+Content-Type: application/json
+
+{
+  "texto": "Qual a diferença entre Promise e async/await?",
+  "participanteId": "{{participanteId}}",
+  "palestraId": "{{palestraId}}"
+}
+
+### PASSO 2: Listar perguntas pendentes (admin)
+GET {{baseUrl}}/perguntas/admin/todas?status=pendente
+
+### PASSO 3: Aprovar a pergunta (usar o ID retornado no passo 1)
+PATCH {{baseUrl}}/perguntas/[ID_DA_PERGUNTA]/aprovar
+
+### PASSO 4: Listar perguntas aprovadas da palestra
+GET {{baseUrl}}/perguntas/palestra/{{palestraId}}
+
+### PASSO 5: Curtir a pergunta
+POST {{baseUrl}}/perguntas/[ID_DA_PERGUNTA]/curtir
+Content-Type: application/json
+
+{
+  "participanteId": "{{participanteId}}"
+}
+
+### PASSO 6: Verificar curtidas do participante
+GET {{baseUrl}}/perguntas/curtidas/{{participanteId}}
+
+### PASSO 7: Descurtir a pergunta
+POST {{baseUrl}}/perguntas/[ID_DA_PERGUNTA]/curtir
+Content-Type: application/json
+
+{
+  "participanteId": "{{participanteId}}"
+}
