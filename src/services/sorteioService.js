@@ -29,8 +29,10 @@ export async function getTudoService({
   minVotos = 0,
   minPresencas = 0,
   minQuizScore = 0,
+  tipoUsuario,
+  turma,
 } = {}) {
-  // 1) Monta filtro de participante (nome/email)
+  // 1) Monta filtro de participante (nome/emai/tipo/turma)
   const whereParticipante = {};
 
   if (nomeContains) {
@@ -45,6 +47,16 @@ export async function getTudoService({
       contains: emailContains,
       mode: 'insensitive',
     };
+  }
+
+  // Filtro por tipo de usuário
+  if (tipoUsuario) {
+    whereParticipante.tipoUsuario = tipoUsuario;
+  }
+
+  // Filtro por turma (apenas se tipoUsuario for 'discente')
+  if (turma && tipoUsuario === 'discente') {
+    whereParticipante.turma = turma;
   }
 
   // 2) Busca participantes já filtrando por nome/email
@@ -108,6 +120,8 @@ export async function getTudoService({
       id: p.id,
       nome: p.nome,
       email: p.email,
+      tipoUsuario: p.tipoUsuario,
+      turma: p.turma,
 
       feedbacks,
       presencas,
