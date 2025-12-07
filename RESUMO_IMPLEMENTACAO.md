@@ -3,8 +3,7 @@
 ## 📦 ARQUIVOS CRIADOS
 
 ### 1. **Schema Prisma** (`prisma/schema.prisma`)
-- ✅ Model `Pergunta` (id, texto, status, curtidas, participanteId, palestraId)
-- ✅ Model `Curtida` (id, participanteId, perguntaId)
+- ✅ Model `Pergunta` (id, texto, status, participanteId, palestraId, criadoEm)
 - ✅ Relacionamentos configurados
 - ✅ Índices para performance
 
@@ -14,15 +13,11 @@
 - ✅ `criarPergunta` - Cria nova pergunta
 - ✅ `aprovarPergunta` - Aprova pergunta (admin)
 - ✅ `rejeitarPergunta` - Rejeita pergunta (admin)
-- ✅ `toggleCurtida` - Curte/descurte (máx 3)
-- ✅ `obterCurtidasParticipante` - Busca curtidas
 - ✅ `deletarPergunta` - Deleta pergunta
 
 ### 3. **Rotas** (`src/routes/perguntasRoutes.js`)
 - ✅ GET `/api/v1/perguntas/palestra/:palestraId`
 - ✅ POST `/api/v1/perguntas`
-- ✅ POST `/api/v1/perguntas/:perguntaId/curtir`
-- ✅ GET `/api/v1/perguntas/curtidas/:participanteId`
 - ✅ GET `/api/v1/perguntas/admin/todas`
 - ✅ PATCH `/api/v1/perguntas/:id/aprovar`
 - ✅ PATCH `/api/v1/perguntas/:id/rejeitar`
@@ -42,10 +37,7 @@
 ### Para Usuários:
 1. ✅ Criar perguntas (status inicial: "pendente")
 2. ✅ Ver perguntas aprovadas da palestra
-3. ✅ Curtir/descurtir perguntas
-4. ✅ Limite de 3 curtidas por usuário
-5. ✅ Ver suas curtidas e saldo restante
-6. ✅ Deletar suas próprias perguntas
+3. ✅ Deletar suas próprias perguntas
 
 ### Para Admins:
 1. ✅ Ver todas as perguntas (pendentes/aprovadas/rejeitadas)
@@ -56,12 +48,10 @@
 6. ✅ Deletar qualquer pergunta
 
 ### Sistema:
-1. ✅ Ordenação automática por curtidas (ranking)
-2. ✅ Validação de limite de curtidas
-3. ✅ Toggle curtir/descurtir
-4. ✅ Relacionamentos entre models
-5. ✅ Índices para performance
-6. ✅ Cascade delete nas curtidas
+1. ✅ Ordenação por data de criação
+2. ✅ Relacionamentos entre models
+3. ✅ Índices para performance
+4. ✅ Validações de campos obrigatórios
 
 ---
 
@@ -91,13 +81,6 @@ GET /api/v1/perguntas/palestra/${palestraId}
 // Criar pergunta
 POST /api/v1/perguntas
 { texto, participanteId, palestraId }
-
-// Curtir/descurtir
-POST /api/v1/perguntas/${perguntaId}/curtir
-{ participanteId }
-
-// Ver curtidas
-GET /api/v1/perguntas/curtidas/${participanteId}
 ```
 
 **Tela Admin:**
@@ -122,23 +105,11 @@ PATCH /api/v1/perguntas/${id}/rejeitar
   id: "64xyz...",
   texto: "Como funciona async/await?",
   status: "aprovada", // pendente | aprovada | rejeitada
-  curtidas: 15,
   criadoEm: "2025-12-06T10:00:00.000Z",
   participanteId: "64abc...",
   palestraId: "64def...",
   participante: { id, nome },
-  palestra: { id, titulo },
-  curtidasPor: [ { id, participanteId, ... } ]
-}
-```
-
-### Curtida
-```javascript
-{
-  id: "64xyz...",
-  participanteId: "64abc...",
-  perguntaId: "64def...",
-  criadoEm: "2025-12-06T11:00:00.000Z"
+  palestra: { id, titulo }
 }
 ```
 
@@ -148,8 +119,6 @@ PATCH /api/v1/perguntas/${id}/rejeitar
 
 ✅ Verifica se palestra existe ao criar pergunta  
 ✅ Verifica se participante existe ao criar pergunta  
-✅ Valida limite de 3 curtidas  
-✅ Permite descurtir para curtir outra  
 ✅ Verifica permissões ao deletar  
 ✅ Valida campos obrigatórios  
 ✅ Trata erros adequadamente
@@ -158,12 +127,9 @@ PATCH /api/v1/perguntas/${id}/rejeitar
 
 ## 🎨 COMPATIBILIDADE COM FRONTEND
 
-As funcionalidades do backend atendem 100% os requisitos do frontend:
+As funcionalidades do backend atendem os requisitos do frontend:
 
-✅ Lista de perguntas ordenadas por curtidas  
-✅ Sistema de curtir/descurtir  
-✅ Limite de 3 curtidas  
-✅ Contador de curtidas usadas  
+✅ Cadastro de perguntas  
 ✅ Fluxo de aprovação (pendente → aprovada)  
 ✅ Tela de moderação admin  
 ✅ Filtros por status  
@@ -205,12 +171,11 @@ npm run dev
 - O sistema usa MongoDB (não-relacional)
 - Prisma Client gerencia os relacionamentos
 - Status de pergunta: `pendente` | `aprovada` | `rejeitada`
-- Curtidas limitadas a 3 por participante
-- Ordenação automática por número de curtidas
+- Ordenação por data de criação
 - Admin identificado por `role: "admin"` no model Participante
 
 ---
 
 ## 🎉 PRONTO PARA USAR!
 
-Todas as partes necessárias do backend foram criadas e estão prontas para integração com o frontend React Native.
+Sistema simplificado de perguntas com cadastro e moderação administrativa.

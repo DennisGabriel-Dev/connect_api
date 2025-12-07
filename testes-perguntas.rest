@@ -25,51 +25,28 @@ Content-Type: application/json
 GET {{baseUrl}}/perguntas/palestra/{{palestraId}}
 
 ### ========================================
-### ❤️ CURTIDAS
-### ========================================
-
-### 3. Curtir uma Pergunta
-POST {{baseUrl}}/perguntas/{{perguntaId}}/curtir
-Content-Type: application/json
-
-{
-  "participanteId": "{{participanteId}}"
-}
-
-### 4. Descurtir uma Pergunta (mesma requisição)
-POST {{baseUrl}}/perguntas/{{perguntaId}}/curtir
-Content-Type: application/json
-
-{
-  "participanteId": "{{participanteId}}"
-}
-
-### 5. Obter Curtidas de um Participante
-GET {{baseUrl}}/perguntas/curtidas/{{participanteId}}
-
-### ========================================
 ### 🔐 ADMIN - Moderação
 ### ========================================
 
-### 6. Listar Todas as Perguntas Pendentes
+### 3. Listar Todas as Perguntas Pendentes
 GET {{baseUrl}}/perguntas/admin/todas?status=pendente
 
-### 7. Listar Todas as Perguntas de uma Palestra (todos os status)
+### 4. Listar Todas as Perguntas de uma Palestra (todos os status)
 GET {{baseUrl}}/perguntas/admin/todas?palestraId={{palestraId}}
 
-### 8. Listar Apenas Aprovadas
+### 5. Listar Apenas Aprovadas
 GET {{baseUrl}}/perguntas/admin/todas?status=aprovada
 
-### 9. Listar Apenas Rejeitadas
+### 6. Listar Apenas Rejeitadas
 GET {{baseUrl}}/perguntas/admin/todas?status=rejeitada
 
-### 10. Aprovar uma Pergunta
+### 7. Aprovar uma Pergunta
 PATCH {{baseUrl}}/perguntas/{{perguntaId}}/aprovar
 
-### 11. Rejeitar uma Pergunta
+### 8. Rejeitar uma Pergunta
 PATCH {{baseUrl}}/perguntas/{{perguntaId}}/rejeitar
 
-### 12. Deletar uma Pergunta
+### 9. Deletar uma Pergunta
 DELETE {{baseUrl}}/perguntas/{{perguntaId}}
 Content-Type: application/json
 
@@ -81,7 +58,7 @@ Content-Type: application/json
 ### 🧪 TESTES DE VALIDAÇÃO
 ### ========================================
 
-### 13. Erro: Criar pergunta sem texto
+### 10. Erro: Criar pergunta sem texto
 POST {{baseUrl}}/perguntas
 Content-Type: application/json
 
@@ -90,18 +67,12 @@ Content-Type: application/json
   "palestraId": "{{palestraId}}"
 }
 
-### 14. Erro: Curtir sem participanteId
-POST {{baseUrl}}/perguntas/{{perguntaId}}/curtir
-Content-Type: application/json
-
-{}
-
-### 15. Erro: Curtir pergunta inexistente
-POST {{baseUrl}}/perguntas/999999999999999999999999/curtir
+### 11. Erro: Deletar pergunta sem permissão
+DELETE {{baseUrl}}/perguntas/{{perguntaId}}
 Content-Type: application/json
 
 {
-  "participanteId": "{{participanteId}}"
+  "participanteId": "999999999999999999999999"
 }
 
 ### ========================================
@@ -127,19 +98,11 @@ PATCH {{baseUrl}}/perguntas/[ID_DA_PERGUNTA]/aprovar
 ### PASSO 4: Listar perguntas aprovadas da palestra
 GET {{baseUrl}}/perguntas/palestra/{{palestraId}}
 
-### PASSO 5: Curtir a pergunta
-POST {{baseUrl}}/perguntas/[ID_DA_PERGUNTA]/curtir
-Content-Type: application/json
+### PASSO 5: Rejeitar uma pergunta
+PATCH {{baseUrl}}/perguntas/[ID_DA_PERGUNTA]/rejeitar
 
-{
-  "participanteId": "{{participanteId}}"
-}
-
-### PASSO 6: Verificar curtidas do participante
-GET {{baseUrl}}/perguntas/curtidas/{{participanteId}}
-
-### PASSO 7: Descurtir a pergunta
-POST {{baseUrl}}/perguntas/[ID_DA_PERGUNTA]/curtir
+### PASSO 6: Deletar uma pergunta
+DELETE {{baseUrl}}/perguntas/[ID_DA_PERGUNTA]
 Content-Type: application/json
 
 {

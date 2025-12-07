@@ -10,12 +10,6 @@ router.get('/palestra/:palestraId', perguntasController.listarPerguntasPorPalest
 // POST /api/v1/perguntas - Criar nova pergunta
 router.post('/', perguntasController.criarPergunta);
 
-// POST /api/v1/perguntas/:perguntaId/curtir - Curtir/Descurtir pergunta
-router.post('/:perguntaId/curtir', perguntasController.toggleCurtida);
-
-// GET /api/v1/perguntas/curtidas/:participanteId - Obter curtidas de um participante
-router.get('/curtidas/:participanteId', perguntasController.obterCurtidasParticipante);
-
 // Rotas administrativas
 // GET /api/v1/perguntas/admin/todas - Listar todas as perguntas (com filtros)
 router.get('/admin/todas', perguntasController.listarTodasPerguntas);

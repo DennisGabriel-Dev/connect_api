@@ -27,13 +27,11 @@ export const listarPerguntasPorPalestra = async (req, res) => {
             id: true,
             nome: true
           }
-        },
-        curtidasPor: true
+        }
       },
-      orderBy: [
-        { curtidas: 'desc' },
-        { criadoEm: 'asc' }
-      ]
+      orderBy: {
+        criadoEm: 'asc'
+      }
     });
 
     return res.status(200).json(perguntas);
@@ -74,13 +72,11 @@ export const listarTodasPerguntas = async (req, res) => {
             id: true,
             titulo: true
           }
-        },
-        curtidasPor: true
+        }
       },
-      orderBy: [
-        { curtidas: 'desc' },
-        { criadoEm: 'asc' }
-      ]
+      orderBy: {
+        criadoEm: 'asc'
+      }
     });
 
     return res.status(200).json(perguntas);
@@ -228,144 +224,6 @@ export const rejeitarPergunta = async (req, res) => {
   } catch (error) {
     console.error("Erro ao rejeitar pergunta:", error);
     return res.status(500).json({ error: "Erro ao rejeitar pergunta." });
-  }
-};
-
-// Curtir/Descurtir pergunta
-export const toggleCurtida = async (req, res) => {
-  try {
-    const { perguntaId } = req.params;
-    const { participanteId } = req.body;
-
-    if (!participanteId) {
-      return res.status(400).json({ error: "participanteId é obrigatório" });
-    }
-
-    // Verificar se a pergunta existe
-    const pergunta = await prisma.pergunta.findUnique({
-      where: { id: perguntaId }
-    });
-
-    if (!pergunta) {
-      return res.status(404).json({ error: "Pergunta não encontrada" });
-    }
-
-    // Verificar se já curtiu
-    const curtidaExistente = await prisma.curtida.findUnique({
-      where: {
-        participanteId_perguntaId: {
-          participanteId,
-          perguntaId
-        }
-      }
-    });
-
-    if (curtidaExistente) {
-      // Descurtir - remover curtida
-      await prisma.curtida.delete({
-        where: {
-          participanteId_perguntaId: {
-            participanteId,
-            perguntaId
-          }
-        }
-      });
-
-      // Decrementar contador
-      const perguntaAtualizada = await prisma.pergunta.update({
-        where: { id: perguntaId },
-        data: {
-          curtidas: {
-            decrement: 1
-          }
-        },
-        include: {
-          curtidasPor: true
-        }
-      });
-
-      return res.status(200).json({
-        message: "Curtida removida",
-        curtiu: false,
-        pergunta: perguntaAtualizada
-      });
-
-    } else {
-      // Verificar limite de 3 curtidas
-      const totalCurtidas = await prisma.curtida.count({
-        where: { participanteId }
-      });
-
-      if (totalCurtidas >= 3) {
-        return res.status(400).json({ 
-          error: "Limite de 3 curtidas atingido. Remova uma curtida para curtir outra pergunta." 
-        });
-      }
-
-      // Curtir - adicionar curtida
-      await prisma.curtida.create({
-        data: {
-          participanteId,
-          perguntaId
-        }
-      });
-
-      // Incrementar contador
-      const perguntaAtualizada = await prisma.pergunta.update({
-        where: { id: perguntaId },
-        data: {
-          curtidas: {
-            increment: 1
-          }
-        },
-        include: {
-          curtidasPor: true
-        }
-      });
-
-      return res.status(200).json({
-        message: "Pergunta curtida",
-        curtiu: true,
-        pergunta: perguntaAtualizada
-      });
-    }
-
-  } catch (error) {
-    console.error("Erro ao curtir/descurtir pergunta:", error);
-    return res.status(500).json({ error: "Erro ao processar curtida." });
-  }
-};
-
-// Obter curtidas de um participante
-export const obterCurtidasParticipante = async (req, res) => {
-  try {
-    const { participanteId } = req.params;
-
-    const curtidas = await prisma.curtida.findMany({
-      where: { participanteId },
-      include: {
-        pergunta: {
-          include: {
-            palestra: {
-              select: {
-                id: true,
-                titulo: true
-              }
-            }
-          }
-        }
-      }
-    });
-
-    return res.status(200).json({
-      totalCurtidas: curtidas.length,
-      curtidasRestantes: 3 - curtidas.length,
-      curtidas
-    });
-
-  } catch (error) {
-    console.error("Erro ao obter curtidas:", error);
-    return res.status(500).json({ error: "Erro ao buscar curtidas." });
   }
 };
 

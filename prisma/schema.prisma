@@ -93,7 +93,6 @@ model Pergunta {
   id              String   @id @default(auto()) @map("_id") @db.ObjectId
   texto           String
   status          String   @default("pendente") // "pendente", "aprovada", "rejeitada"
-  curtidas        Int      @default(0)
   criadoEm        DateTime @default(now())
   
   participanteId  String   @db.ObjectId
@@ -101,25 +100,9 @@ model Pergunta {
   
   palestraId      String   @db.ObjectId
   palestra        Palestra @relation(fields: [palestraId], references: [id])
-  
-  curtidasPor     Curtida[]
 
   @@map("perguntas")
   @@index([palestraId, status])
-}
-
-model Curtida {
-  id              String   @id @default(auto()) @map("_id") @db.ObjectId
-  
-  participanteId  String   @db.ObjectId
-  
-  perguntaId      String   @db.ObjectId
-  pergunta        Pergunta @relation(fields: [perguntaId], references: [id], onDelete: Cascade)
-  
-  criadoEm        DateTime @default(now())
-
-  @@map("curtidas")
-  @@unique([participanteId, perguntaId])
 }
 
 
