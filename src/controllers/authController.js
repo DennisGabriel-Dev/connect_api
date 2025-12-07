@@ -38,12 +38,29 @@ export const cadastrarSenha = async (req, res) => {
     const hashSenha = await bcrypt.hash(senha, salt);
 
     // 4. Atualiza o usuário com a nova senha
-    await prisma.participante.update({
+    const usuarioAtualizado = await prisma.participante.update({
       where: { email: email },
       data: { senha: hashSenha }
     });
 
-    return res.status(201).json({ message: "Senha cadastrada com sucesso! Agora você pode logar." });
+    // 5. Remove a senha do objeto de retorno por segurança
+    const { senha: _, ...dadosUsuario } = usuarioAtualizado;
+
+    // role sempre existirá
+    const role = dadosUsuario.role || 'user';
+
+    return res.status(201).json({ 
+      message: "Senha cadastrada com sucesso! Agora você pode logar.",
+      usuario: {
+        id: dadosUsuario.id,
+        even3Id: dadosUsuario.even3Id,
+        nome: dadosUsuario.nome,
+        email: dadosUsuario.email,
+        role,                      
+        isAdmin: role === 'admin',
+        perfilCompleto: dadosUsuario.perfilCompleto // retorna se o perfil foi completado, se respondeu o formulario
+      }
+    });
 
   } catch (error) {
     console.error(error);
