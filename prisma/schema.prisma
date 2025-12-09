@@ -106,6 +106,8 @@ model Pergunta {
   palestraId      String   @db.ObjectId
   palestra        Palestra @relation(fields: [palestraId], references: [id])
 
+  curtidas        Int @default(0)
+
   @@map("perguntas")
   @@index([palestraId, status])
 }
