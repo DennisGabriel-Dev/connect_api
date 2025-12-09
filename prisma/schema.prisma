@@ -25,6 +25,7 @@ model Participante {
   // CORREÇÃO AQUI: 
   presencas    Presenca[]
   feedbacks    Feedback[]
+  perguntas    Pergunta[]
   
   @@map("participantes")
 }
@@ -43,6 +44,7 @@ model Palestra {
   // CORREÇÃO AQUI: Sem '?'
   presencas    Presenca[]
   feedbacks    Feedback[]
+  perguntas    Pergunta[]
 
   quizzes    Quiz[]
   
@@ -90,6 +92,22 @@ model Feedback {
 
   @@map("feedbacks")
   @@unique([participanteId, palestraId])
+}
+
+model Pergunta {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  texto           String
+  status          String   @default("pendente") // "pendente", "aprovada", "rejeitada"
+  criadoEm        DateTime @default(now())
+  
+  participanteId  String   @db.ObjectId
+  participante    Participante @relation(fields: [participanteId], references: [id])
+  
+  palestraId      String   @db.ObjectId
+  palestra        Palestra @relation(fields: [palestraId], references: [id])
+
+  @@map("perguntas")
+  @@index([palestraId, status])
 }
 
 
