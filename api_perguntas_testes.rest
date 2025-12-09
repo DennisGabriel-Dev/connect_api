@@ -1,0 +1,82 @@
+### ===== SISTEMA DE PERGUNTAS E VOTAÇÃO =====
+
+### 1️⃣ Criar Participante de Teste
+POST http://localhost:5000/api/v1/usuarios
+Content-Type: application/json
+
+{
+  "even3Id": 1001,
+  "nome": "João Silva",
+  "email": "joao@teste.com"
+}
+
+### 2️⃣ Criar uma Palestra de Teste
+# Use Prisma Studio para isso (mais fácil)
+# Ou crie manualmente via MongoDB Compass
+
+### 3️⃣ Criar Pergunta
+POST http://localhost:5000/api/v1/perguntas
+Content-Type: application/json
+
+{
+  "texto": "Como implementar autenticação JWT no Node.js?\n\nGostaria de entender as melhores práticas para proteger rotas da API.",
+  "participanteId": "69371d76210f3d4d365f3f7f",
+  "participanteNome": "João Silva",
+  "palestraId": "69371d9f210f3d4d365f3f86",
+  "palestraTitulo": "Workshop Node.js"
+}
+
+### 4️⃣ Listar Perguntas de uma Palestra (ordenadas por votos)
+GET http://localhost:5000/api/v1/perguntas/palestra/69371d9f210f3d4d365f3f86
+
+### 5️⃣ Votar em Pergunta (Participante A)
+PUT http://localhost:5000/api/v1/perguntas/6937237b210f3d4d365f3fbd/curtir
+x-participante-id: 69371d76210f3d4d365f3f7f
+
+### 6️⃣ Votar novamente (DESFAZ o voto - toggle)
+PUT http://localhost:5000/api/v1/perguntas/693721e9210f3d4d365f3fa1/curtir
+x-participante-id: 69371d76210f3d4d365f3f7f
+
+### 7️⃣ Contar Votos do Participante
+GET http://localhost:5000/api/v1/perguntas/participante/69371d76210f3d4d365f3f7f/votos?palestraId=69371d9f210f3d4d365f3f86
+
+### ===== TESTES DE VALIDAÇÃO =====
+
+### ❌ Teste: Votar na Própria Pergunta (deve retornar erro 403)
+# Crie pergunta como Participante A, depois tente votar nela com mesmo ID
+PUT http://localhost:5000/api/v1/perguntas/693720c38d4817c59f601c3a/curtir
+x-participante-id: 69371d76210f3d4d365f3f7f
+# Resposta esperada: {"error": "Você não pode votar na sua própria pergunta"}
+
+### ❌ Teste: Limite de 3 Votos (deve retornar erro 400)
+# Vote em 3 perguntas diferentes, depois tente votar na 4ª
+PUT http://localhost:5000/api/v1/perguntas/693721e9210f3d4d365f3fa1/curtir
+x-participante-id: 69371d76210f3d4d365f3f7f
+
+PUT http://localhost:5000/api/v1/perguntas/6937234b210f3d4d365f3fb1/curtir
+x-participante-id: 69371d76210f3d4d365f3f7f
+
+PUT http://localhost:5000/api/v1/perguntas/6937236a210f3d4d365f3fb7/curtir
+x-participante-id: 69371d76210f3d4d365f3f7f
+
+# Esta deve falhar:
+PUT http://localhost:5000/api/v1/perguntas/6937237b210f3d4d365f3fbd/curtir
+x-participante-id: 69371d76210f3d4d365f3f7f
+# Resposta esperada: {"error": "Você atingiu o limite de 3 votos..."}
+
+### ✅ Teste: Desfazer Voto (deve funcionar)
+PUT http://localhost:5000/api/v1/perguntas/693721e9210f3d4d365f3fa1/curtir
+x-participante-id: 69371d76210f3d4d365f3f7f
+# Resposta: {"success": true, "message": "Voto removido"}
+
+### 8️⃣ Responder Pergunta (Admin/Palestrante)
+PUT http://localhost:5000/api/v1/perguntas/693721e9210f3d4d365f3fa1/responder
+Content-Type: application/json
+
+{
+  "resposta": "Para implementar JWT no Node.js, você pode usar a biblioteca 'jsonwebtoken'. Primeiro instale com npm install jsonwebtoken, depois...",
+  "palestranteNome": "Dr. João Santos"
+}
+
+### 9️⃣ Buscar Pergunta Específica
+GET http://localhost:5000/api/v1/perguntas/693721e9210f3d4d365f3fa1

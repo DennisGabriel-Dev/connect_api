@@ -20,6 +20,8 @@ model Participante {
   // CORREÇÃO AQUI: 
   presencas    Presenca[]
   feedbacks    Feedback[]
+  perguntas    Pergunta[]  // Sistema de perguntas
+  votos        Voto[]      // Sistema de votação
   
   @@map("participantes")
 }
@@ -38,8 +40,12 @@ model Palestra {
   // CORREÇÃO AQUI: Sem '?'
   presencas    Presenca[]
   feedbacks    Feedback[]
-
-  quizzes    Quiz[]
+  quizzes      Quiz[]
+  perguntas    Pergunta[]  // Sistema de perguntas
+  
+  // Período de votação (opcional)
+  votacaoInicio DateTime?
+  votacaoFim    DateTime?
   
   @@map("palestras")
 }
@@ -140,4 +146,50 @@ model Tentativa {
 
   @@map("tentativas")
   @@unique([participanteId, quizId])
+}
+
+// Sistema de Perguntas e Votação
+model Pergunta {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  texto           String   // Contém título + descrição separados por \n\n
+  
+  participanteId  String   @db.ObjectId
+  participante    Participante @relation(fields: [participanteId], references: [id])
+  
+  palestraId      String   @db.ObjectId
+  palestra        Palestra @relation(fields: [palestraId], references: [id])
+  
+  respondida      Boolean  @default(false)
+  resposta        String?
+  palestranteNome String?
+  dataResposta    DateTime?
+  
+  dataHora        DateTime @default(now())
+  
+  // Contador desnormalizado para performance (atualizado via service)
+  curtidas        Int      @default(0)
+  
+  // Relações
+  votos           Voto[]
+  
+  @@map("perguntas")
+  @@index([palestraId])
+  @@index([participanteId])
+}
+
+model Voto {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  
+  participanteId  String   @db.ObjectId
+  participante    Participante @relation(fields: [participanteId], references: [id])
+  
+  perguntaId      String   @db.ObjectId
+  pergunta        Pergunta @relation(fields: [perguntaId], references: [id])
+  
+  dataHora        DateTime @default(now())
+  
+  @@map("votos")
+  @@unique([participanteId, perguntaId]) // Um voto por pessoa por pergunta
+  @@index([participanteId])
+  @@index([perguntaId])
 }
