@@ -44,6 +44,9 @@ const usuariosController = {
           nome: true,
           email: true,
           even3Id: true,
+          tipoUsuario: true,
+          turma: true,
+          perfilCompleto: true,
         },
       });
       res.status(200).json(participantes);

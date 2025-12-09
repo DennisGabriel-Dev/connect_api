@@ -16,6 +16,11 @@ model Participante {
   email        String @unique
   senha        String? 
   role         String @default("user") // "user" ou "admin"
+
+  // Campos de perfil pós-cadastro
+  tipoUsuario     String? // "publico_externo", "docente", "discente"
+  turma           String? // Preenchido apenas se tipoUsuario == "discente"
+  perfilCompleto  Boolean @default(false)
   
   // CORREÇÃO AQUI: 
   presencas    Presenca[]
@@ -94,6 +99,8 @@ model Feedback {
 }
 
 
+
+
 model Quiz {
   id String @id @default(auto()) @map("_id") @db.ObjectId
   titulo    String
@@ -152,6 +159,7 @@ model Tentativa {
 model Pergunta {
   id              String   @id @default(auto()) @map("_id") @db.ObjectId
   texto           String   // Contém título + descrição separados por \n\n
+  status          String   @default("pendente") // "pendente", "aprovada", "rejeitada"
   
   participanteId  String   @db.ObjectId
   participante    Participante @relation(fields: [participanteId], references: [id])
@@ -173,7 +181,7 @@ model Pergunta {
   votos           Voto[]
   
   @@map("perguntas")
-  @@index([palestraId])
+  @@index([palestraId, status])
   @@index([participanteId])
 }
 
