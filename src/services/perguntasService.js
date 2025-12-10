@@ -1,7 +1,15 @@
 import prisma from '../lib/prisma.js';
+import { buscarPalestraComPeriodo } from '../utils/periodoVotacao.js';
 
 // Criar pergunta
 export async function criarPergunta({ texto, participanteId, palestraId }) {
+    // Verificar período de votação
+    const { periodoStatus } = await buscarPalestraComPeriodo(palestraId);
+
+    if (!periodoStatus.ativo) {
+        throw new Error(periodoStatus.motivo || 'O período para criar perguntas encerrou');
+    }
+
     return await prisma.pergunta.create({
         data: {
             texto,
@@ -110,13 +118,11 @@ export async function toggleVoto(perguntaId, participanteId) {
         throw new Error('Você não pode votar na sua própria pergunta');
     }
 
-    // 3. Verificar período de votação (se definido)
-    const { votacaoInicio, votacaoFim } = pergunta.palestra;
-    if (votacaoInicio && votacaoFim) {
-        const agora = new Date();
-        if (agora < votacaoInicio || agora > votacaoFim) {
-            throw new Error('O período de votação para esta atividade encerrou');
-        }
+    // 3. Verificar período de votação (usa helper que suporta período padrão)
+    const { periodoStatus } = await buscarPalestraComPeriodo(pergunta.palestraId);
+
+    if (!periodoStatus.ativo) {
+        throw new Error(periodoStatus.motivo || 'O período de votação para esta atividade encerrou');
     }
 
     // 4. Verificar se já votou
