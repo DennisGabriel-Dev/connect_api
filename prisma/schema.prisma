@@ -99,8 +99,6 @@ model Feedback {
 }
 
 
-
-
 model Quiz {
   id String @id @default(auto()) @map("_id") @db.ObjectId
   titulo    String
