@@ -7,6 +7,7 @@ export async function criarPergunta({ texto, participanteId, palestraId }) {
             texto,
             participanteId,
             palestraId,
+            status: 'pendente', // Inicia como pendente
             curtidas: 0,
             respondida: false
         }
@@ -14,9 +15,16 @@ export async function criarPergunta({ texto, participanteId, palestraId }) {
 }
 
 // Listar perguntas por palestra (ordenadas por votos)
-export async function listarPerguntasPorPalestra(palestraId) {
+export async function listarPerguntasPorPalestra(palestraId, status = null) {
+    const whereClause = { palestraId };
+
+    // Se status for especificado, filtrar por ele
+    if (status) {
+        whereClause.status = status;
+    }
+
     const perguntas = await prisma.pergunta.findMany({
-        where: { palestraId },
+        where: whereClause,
         include: {
             participante: {
                 select: { nome: true, id: true }
@@ -48,7 +56,8 @@ export async function listarPerguntasPorPalestra(palestraId) {
         palestranteNome: p.palestranteNome,
         dataResposta: p.dataResposta?.toISOString(),
         curtidas: p.curtidas,
-        usuariosVotaram: p.votos.map(v => v.participanteId) // Array de IDs que votaram
+        usuariosVotaram: p.votos.map(v => v.participanteId), // Array de IDs que votaram
+        status: p.status // Incluir status
     }));
 }
 
@@ -79,7 +88,8 @@ export async function buscarPerguntaPorId(id) {
         palestranteNome: pergunta.palestranteNome,
         dataResposta: pergunta.dataResposta?.toISOString(),
         curtidas: pergunta.curtidas,
-        usuariosVotaram: pergunta.votos.map(v => v.participanteId)
+        usuariosVotaram: pergunta.votos.map(v => v.participanteId),
+        status: pergunta.status // Incluir status
     };
 }
 
