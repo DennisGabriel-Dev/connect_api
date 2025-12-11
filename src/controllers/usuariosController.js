@@ -2,11 +2,37 @@ import prisma from "../lib/prisma.js";
 
 const usuariosController = {
   async create(req, res) {
-    const { nome, email } = req.body;
-    const usuarios = await prisma.participante.create({
-      data: { nome, email },
-    });
-    res.json(usuarios);
+    try {
+      const { nome, email, even3Id } = req.body;
+
+      // Validações
+      if (!nome || !email || !even3Id) {
+        return res.status(400).json({
+          error: 'Campos obrigatórios: nome, email, even3Id'
+        });
+      }
+
+      const usuario = await prisma.participante.create({
+        data: {
+          nome,
+          email,
+          even3Id: parseInt(even3Id) // Garantir que é número
+        },
+      });
+
+      res.status(201).json(usuario);
+    } catch (error) {
+      console.error('Erro ao criar participante:', error);
+
+      // Erro de duplicação (email ou even3Id único)
+      if (error.code === 'P2002') {
+        return res.status(400).json({
+          error: 'Email ou even3Id já cadastrado'
+        });
+      }
+
+      res.status(500).json({ error: 'Erro ao criar participante' });
+    }
   },
 
   // Listar todos os participantes

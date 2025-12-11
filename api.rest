@@ -34,12 +34,12 @@ POST {{baseUrl}}/api/v1/presenca
 Content-Type: application/json
 
 {
-    "participanteId": "69266189a9e74a0fc2694e60",
-    "palestraId": "6926618aa9e74a0fc2694e63"
+    "participanteId": "69371c8096ee7ecd715d9de2",
+    "palestraId": "69371d9f210f3d4d365f3f86"
 }
 
 ### QR CODE - REGISTRAR PRESENÇA VIA QR (GET - Simula escaneamento)
-GET {{baseUrl}}/api/v1/presenca/qr?participanteId=6929daa4e7c76f992b087cec&palestraId=6926618aa9e74a0fc2694e63
+GET {{baseUrl}}/api/v1/presenca/qr?participanteId=69371c8096ee7ecd715d9de2&palestraId=69371d9f210f3d4d365f3f86
 
 ### QR CODE - LISTAR PRESENÇAS - Com o id do participante
 # GET {{baseUrl}}/api/v1/presenca/{participanteId}
@@ -97,3 +97,15 @@ GET {{baseUrl}}/api/v1/palestras/participante/692a6649331f5e42f2e8412e
 ### PALESTRAS - BUSCAR QUIZ DA PALESTRA
 # Busca o quiz associado a uma palestra específica pelo ID da palestra
 GET {{baseUrl}}/api/v1/palestras/692c6472888b627581660d86/quiz
+
+### PERGUNTAS - CRIAR PERGUNTAS
+POST {{baseUrl}}/api/v1/perguntas
+Content-Type: application/json
+
+{
+    "texto": "Onde você estudou?",
+    "participanteId": "69371c8096ee7ecd715d9de0",
+    "participanteNome": "Fulano",
+    "palestraId": "693736a2346686b58c2c69e8",
+    "palestraTitulo": "Palestra 3"
+}

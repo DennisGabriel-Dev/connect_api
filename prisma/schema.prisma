@@ -25,7 +25,8 @@ model Participante {
   // CORREÇÃO AQUI: 
   presencas    Presenca[]
   feedbacks    Feedback[]
-  perguntas    Pergunta[]
+  perguntas    Pergunta[]  // Sistema de perguntas
+  votos        Voto[]      // Sistema de votação
   
   @@map("participantes")
 }
@@ -44,9 +45,11 @@ model Palestra {
   // CORREÇÃO AQUI: Sem '?'
   presencas    Presenca[]
   feedbacks    Feedback[]
-  perguntas    Pergunta[]
-
-  quizzes    Quiz[]
+  quizzes      Quiz[]
+  perguntas    Pergunta[]  // Sistema de perguntas
+  
+  // Controle simples de período de votação
+  periodoVotacaoAtivo Boolean @default(false)
   
   @@map("palestras")
 }
@@ -92,24 +95,6 @@ model Feedback {
 
   @@map("feedbacks")
   @@unique([participanteId, palestraId])
-}
-
-model Pergunta {
-  id              String   @id @default(auto()) @map("_id") @db.ObjectId
-  texto           String
-  status          String   @default("pendente") // "pendente", "aprovada", "rejeitada"
-  criadoEm        DateTime @default(now())
-  
-  participanteId  String   @db.ObjectId
-  participante    Participante @relation(fields: [participanteId], references: [id])
-  
-  palestraId      String   @db.ObjectId
-  palestra        Palestra @relation(fields: [palestraId], references: [id])
-
-  curtidas        Int @default(0)
-
-  @@map("perguntas")
-  @@index([palestraId, status])
 }
 
 
@@ -165,4 +150,51 @@ model Tentativa {
 
   @@map("tentativas")
   @@unique([participanteId, quizId])
+}
+
+// Sistema de Perguntas e Votação
+model Pergunta {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  texto           String   // Contém título + descrição separados por \n\n
+  status          String   @default("pendente") // "pendente", "aprovada", "rejeitada"
+  
+  participanteId  String   @db.ObjectId
+  participante    Participante @relation(fields: [participanteId], references: [id])
+  
+  palestraId      String   @db.ObjectId
+  palestra        Palestra @relation(fields: [palestraId], references: [id])
+  
+  respondida      Boolean  @default(false)
+  resposta        String?
+  palestranteNome String?
+  dataResposta    DateTime?
+  
+  dataHora        DateTime @default(now())
+  
+  // Contador desnormalizado para performance (atualizado via service)
+  curtidas        Int      @default(0)
+  
+  // Relações
+  votos           Voto[]
+  
+  @@map("perguntas")
+  @@index([palestraId, status])
+  @@index([participanteId])
+}
+
+model Voto {
+  id              String   @id @default(auto()) @map("_id") @db.ObjectId
+  
+  participanteId  String   @db.ObjectId
+  participante    Participante @relation(fields: [participanteId], references: [id])
+  
+  perguntaId      String   @db.ObjectId
+  pergunta        Pergunta @relation(fields: [perguntaId], references: [id])
+  
+  dataHora        DateTime @default(now())
+  
+  @@map("votos")
+  @@unique([participanteId, perguntaId]) // Um voto por pessoa por pergunta
+  @@index([participanteId])
+  @@index([perguntaId])
 }

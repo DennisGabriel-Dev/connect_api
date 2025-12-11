@@ -1,13 +1,13 @@
-import prisma from '../lib/prisma.js'; 
+import prisma from '../lib/prisma.js';
 
 
 export const listar = async (req, res) => {
   try {
-    
+
     const { tipo } = req.query;
 
     const whereClause = {};
-    
+
     // Se o filtro vier preenchido, adiciona na busca
     if (tipo) {
       whereClause.tipo = tipo;
@@ -72,54 +72,128 @@ export const listarPalestrasPorParticipante = async (req, res) => {
   }
 };
 
-  // Endpoint: Buscar quiz vinculado à palestra
-  export const obterQuizDaPalestra = async (req, res) => {
-    try {
-      const { id } = req.params;
+// Endpoint: Buscar quiz vinculado à palestra
+export const obterQuizDaPalestra = async (req, res) => {
+  try {
+    const { id } = req.params;
 
-      const participanteId = req.headers['x-participante-id'];
+    const participanteId = req.headers['x-participante-id'];
 
-      if (!id) {
-        return res.status(400).json({ error: 'palestraId é obrigatório' });
-      }
-
-      const quiz = await prisma.quiz.findFirst({
-        where: { palestraId: id },
-      });
-
-      if (!quiz) {
-        return res.status(404).json({ error: 'Quiz não encontrado para esta palestra.' });
-      }
-
-      let jaRespondeu = false;
-      let presencaConfirmada = false;
-
-      if (participanteId) {
-        const tentativa = await prisma.tentativa.findUnique({
-          where: {
-            participanteId_quizId: {
-              participanteId: participanteId,
-              quizId: quiz.id
-            }
-          }
-        });
-        jaRespondeu = !!tentativa; 
-
-        const presenca = await prisma.presenca.findUnique({
-          where:{
-            participanteId_palestraId: {
-              participanteId: participanteId,
-              palestraId: id
-            }
-          }
-        })
-        presencaConfirmada = !!presenca;
-
-      }
-
-      return res.status(200).json({ ...quiz, jaRespondeu: jaRespondeu, presencaConfirmada: presencaConfirmada});
-    } catch (error) {
-      console.error('Erro ao buscar quiz da palestra:', error);
-      return res.status(500).json({ error: 'Erro ao buscar quiz da palestra.' });
+    if (!id) {
+      return res.status(400).json({ error: 'palestraId é obrigatório' });
     }
-  };
+
+    const quiz = await prisma.quiz.findFirst({
+      where: { palestraId: id },
+    });
+
+    if (!quiz) {
+      return res.status(404).json({ error: 'Quiz não encontrado para esta palestra.' });
+    }
+
+    let jaRespondeu = false;
+    let presencaConfirmada = false;
+
+    if (participanteId) {
+      const tentativa = await prisma.tentativa.findUnique({
+        where: {
+          participanteId_quizId: {
+            participanteId: participanteId,
+            quizId: quiz.id
+          }
+        }
+      });
+      jaRespondeu = !!tentativa;
+
+      const presenca = await prisma.presenca.findUnique({
+        where: {
+          participanteId_palestraId: {
+            participanteId: participanteId,
+            palestraId: id
+          }
+        }
+      })
+      presencaConfirmada = !!presenca;
+
+    }
+
+    return res.status(200).json({ ...quiz, jaRespondeu: jaRespondeu, presencaConfirmada: presencaConfirmada });
+  } catch (error) {
+    console.error('Erro ao buscar quiz da palestra:', error);
+    return res.status(500).json({ error: 'Erro ao buscar quiz da palestra.' });
+  }
+};
+
+// POST /api/v1/palestras/:id/periodo-votacao/iniciar - Iniciar período de votação (Admin)
+export const iniciarPeriodoVotacao = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const palestra = await prisma.palestra.update({
+      where: { id },
+      data: { periodoVotacaoAtivo: true }
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Período de votação iniciado com sucesso',
+      periodoAtivo: palestra.periodoVotacaoAtivo
+    });
+  } catch (error) {
+    console.error('Erro ao iniciar período de votação:', error);
+    return res.status(500).json({ error: 'Erro ao iniciar período de votação.' });
+  }
+};
+
+// POST /api/v1/palestras/:id/periodo-votacao/encerrar - Encerrar período de votação (Admin)
+export const encerrarPeriodoVotacao = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const palestra = await prisma.palestra.update({
+      where: { id },
+      data: { periodoVotacaoAtivo: false }
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Período de votação encerrado com sucesso',
+      periodoAtivo: palestra.periodoVotacaoAtivo
+    });
+  } catch (error) {
+    console.error('Erro ao encerrar período de votação:', error);
+    return res.status(500).json({ error: 'Erro ao encerrar período de votação.' });
+  }
+};
+
+// GET /api/v1/palestras/:id/periodo-votacao - Buscar status do período de votação
+export const obterPeriodoVotacao = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const palestra = await prisma.palestra.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        titulo: true,
+        periodoVotacaoAtivo: true
+      }
+    });
+
+    if (!palestra) {
+      return res.status(404).json({ error: 'Palestra não encontrada' });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        palestraId: palestra.id,
+        palestraTitulo: palestra.titulo,
+        periodoAtivo: palestra.periodoVotacaoAtivo
+      }
+    });
+  } catch (error) {
+    console.error('Erro ao buscar período de votação:', error);
+    return res.status(500).json({ error: 'Erro ao buscar período de votação.' });
+  }
+};
