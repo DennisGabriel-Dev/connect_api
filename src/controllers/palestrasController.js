@@ -124,53 +124,49 @@ export const obterQuizDaPalestra = async (req, res) => {
   }
 };
 
-// PATCH /api/v1/palestras/:id/periodo-votacao - Configurar período de votação (Admin)
-export const configurarPeriodoVotacao = async (req, res) => {
+// POST /api/v1/palestras/:id/periodo-votacao/iniciar - Iniciar período de votação (Admin)
+export const iniciarPeriodoVotacao = async (req, res) => {
   try {
     const { id } = req.params;
-    const { votacaoInicio, votacaoFim } = req.body;
-
-    if (!votacaoInicio || !votacaoFim) {
-      return res.status(400).json({
-        error: 'votacaoInicio e votacaoFim são obrigatórios'
-      });
-    }
-
-    const inicio = new Date(votacaoInicio);
-    const fim = new Date(votacaoFim);
-
-    // Validar que fim é após início
-    if (fim <= inicio) {
-      return res.status(400).json({
-        error: 'A data de fim deve ser posterior à data de início'
-      });
-    }
 
     const palestra = await prisma.palestra.update({
       where: { id },
-      data: {
-        votacaoInicio: inicio,
-        votacaoFim: fim
-      }
+      data: { periodoVotacaoAtivo: true }
     });
 
     return res.status(200).json({
       success: true,
-      message: 'Período de votação configurado com sucesso',
-      data: {
-        id: palestra.id,
-        titulo: palestra.titulo,
-        votacaoInicio: palestra.votacaoInicio,
-        votacaoFim: palestra.votacaoFim
-      }
+      message: 'Período de votação iniciado com sucesso',
+      periodoAtivo: palestra.periodoVotacaoAtivo
     });
   } catch (error) {
-    console.error('Erro ao configurar período de votação:', error);
-    return res.status(500).json({ error: 'Erro ao configurar período de votação.' });
+    console.error('Erro ao iniciar período de votação:', error);
+    return res.status(500).json({ error: 'Erro ao iniciar período de votação.' });
   }
 };
 
-// GET /api/v1/palestras/:id/periodo-votacao - Buscar período de votação
+// POST /api/v1/palestras/:id/periodo-votacao/encerrar - Encerrar período de votação (Admin)
+export const encerrarPeriodoVotacao = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const palestra = await prisma.palestra.update({
+      where: { id },
+      data: { periodoVotacaoAtivo: false }
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Período de votação encerrado com sucesso',
+      periodoAtivo: palestra.periodoVotacaoAtivo
+    });
+  } catch (error) {
+    console.error('Erro ao encerrar período de votação:', error);
+    return res.status(500).json({ error: 'Erro ao encerrar período de votação.' });
+  }
+};
+
+// GET /api/v1/palestras/:id/periodo-votacao - Buscar status do período de votação
 export const obterPeriodoVotacao = async (req, res) => {
   try {
     const { id } = req.params;
@@ -180,9 +176,7 @@ export const obterPeriodoVotacao = async (req, res) => {
       select: {
         id: true,
         titulo: true,
-        votacaoInicio: true,
-        votacaoFim: true,
-        horarios: true
+        periodoVotacaoAtivo: true
       }
     });
 
@@ -190,21 +184,12 @@ export const obterPeriodoVotacao = async (req, res) => {
       return res.status(404).json({ error: 'Palestra não encontrada' });
     }
 
-    // Calcular período efetivo (configurado ou padrão)
-    const { verificarPeriodoAtivo } = await import('../utils/periodoVotacao.js');
-    const periodoStatus = verificarPeriodoAtivo(palestra);
-
     return res.status(200).json({
       success: true,
       data: {
         palestraId: palestra.id,
         palestraTitulo: palestra.titulo,
-        votacaoInicio: palestra.votacaoInicio,
-        votacaoFim: palestra.votacaoFim,
-        periodoAtivo: periodoStatus.ativo,
-        periodoEfetivo: periodoStatus.periodo,
-        usandoPadrao: periodoStatus.periodo?.isPadrao || false,
-        motivo: periodoStatus.motivo
+        periodoAtivo: palestra.periodoVotacaoAtivo
       }
     });
   } catch (error) {

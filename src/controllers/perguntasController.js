@@ -53,6 +53,48 @@ export const listarPorPalestra = async (req, res) => {
   }
 };
 
+// GET /api/v1/perguntas/palestra/:palestraId/pendentes/:participanteId - Listar perguntas pendentes do participante
+export const listarPendentesPorParticipante = async (req, res) => {
+  try {
+    const { palestraId, participanteId } = req.params;
+
+    const perguntas = await prisma.pergunta.findMany({
+      where: {
+        palestraId,
+        participanteId,
+        status: 'pendente'
+      },
+      include: {
+        participante: {
+          select: {
+            id: true,
+            nome: true
+          }
+        },
+        palestra: {
+          select: {
+            id: true,
+            titulo: true
+          }
+        }
+      },
+      orderBy: {
+        dataHora: 'desc'
+      }
+    });
+
+    return res.status(200).json({
+      success: true,
+      count: perguntas.length,
+      data: perguntas
+    });
+  } catch (error) {
+    console.error('Erro ao listar perguntas pendentes:', error);
+    return res.status(500).json({ error: 'Erro ao listar perguntas pendentes' });
+  }
+};
+
+
 // GET /api/v1/perguntas/:id - Buscar pergunta
 export const buscarPorId = async (req, res) => {
   try {
@@ -104,6 +146,77 @@ export const toggleCurtida = async (req, res) => {
     console.error('Stack trace:', error.stack);
     console.error('Detalhes:', { perguntaId, participanteId });
     return res.status(500).json({ error: 'Erro ao processar voto', detalhes: error.message });
+  }
+};
+
+// PUT /api/v1/perguntas/:id - Editar pergunta (apenas autor e pendente)
+export const editarPergunta = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { participanteId, texto } = req.body;
+
+    if (!texto || !participanteId) {
+      return res.status(400).json({ error: 'Campos obrigatórios faltando' });
+    }
+
+    // Buscar pergunta
+    const pergunta = await prisma.pergunta.findUnique({
+      where: { id },
+      include: { palestra: true }
+    });
+
+    if (!pergunta) {
+      return res.status(404).json({ error: 'Pergunta não encontrada' });
+    }
+
+    // Verificar se é o autor
+    if (pergunta.participanteId !== participanteId) {
+      return res.status(403).json({ error: 'Você não tem permissão para editar esta pergunta' });
+    }
+
+    // Verificar se está pendente
+    if (pergunta.status !== 'pendente') {
+      return res.status(403).json({
+        error: 'Não é possível editar perguntas que já foram moderadas'
+      });
+    }
+
+    // Verificar período ativo
+    const { verificarPeriodoAtivo } = await import('../utils/periodoVotacao.js');
+    const periodoStatus = verificarPeriodoAtivo(pergunta.palestra);
+
+    if (!periodoStatus.ativo) {
+      return res.status(403).json({ error: periodoStatus.motivo });
+    }
+
+    // Atualizar pergunta
+    const perguntaAtualizada = await prisma.pergunta.update({
+      where: { id },
+      data: { texto },
+      include: {
+        participante: {
+          select: {
+            id: true,
+            nome: true
+          }
+        },
+        palestra: {
+          select: {
+            id: true,
+            titulo: true
+          }
+        }
+      }
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: 'Pergunta editada com sucesso',
+      data: perguntaAtualizada
+    });
+  } catch (error) {
+    console.error('Erro ao editar pergunta:', error);
+    return res.status(500).json({ error: 'Erro ao editar pergunta' });
   }
 };
 

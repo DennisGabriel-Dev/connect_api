@@ -1,5 +1,5 @@
 import express from 'express';
-import { listar, listarPalestrasPorParticipante, obterQuizDaPalestra, configurarPeriodoVotacao, obterPeriodoVotacao } from '../controllers/palestrasController.js';
+import { listar, listarPalestrasPorParticipante, obterQuizDaPalestra, iniciarPeriodoVotacao, encerrarPeriodoVotacao, obterPeriodoVotacao } from '../controllers/palestrasController.js';
 
 const router = express.Router();
 
@@ -12,10 +12,13 @@ router.get('/participante/:participanteId', listarPalestrasPorParticipante);
 // GET /api/v1/palestras/:id/quiz - Obter quiz da palestra
 router.get('/:id/quiz', obterQuizDaPalestra);
 
-// GET /api/v1/palestras/:id/periodo-votacao - Obter período de votação
+// GET /api/v1/palestras/:id/periodo-votacao - Obter status do período
 router.get('/:id/periodo-votacao', obterPeriodoVotacao);
 
-// PATCH /api/v1/palestras/:id/periodo-votacao - Configurar período de votação (Admin)
-router.patch('/:id/periodo-votacao', configurarPeriodoVotacao);
+// POST /api/v1/palestras/:id/periodo-votacao/iniciar - Iniciar período (Admin)
+router.post('/:id/periodo-votacao/iniciar', iniciarPeriodoVotacao);
+
+// POST /api/v1/palestras/:id/periodo-votacao/encerrar - Encerrar período (Admin)
+router.post('/:id/periodo-votacao/encerrar', encerrarPeriodoVotacao);
 
 export default router;

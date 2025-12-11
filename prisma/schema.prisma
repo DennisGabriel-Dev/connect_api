@@ -48,9 +48,8 @@ model Palestra {
   quizzes      Quiz[]
   perguntas    Pergunta[]  // Sistema de perguntas
   
-  // Período de votação (opcional)
-  votacaoInicio DateTime?
-  votacaoFim    DateTime?
+  // Controle simples de período de votação
+  periodoVotacaoAtivo Boolean @default(false)
   
   @@map("palestras")
 }

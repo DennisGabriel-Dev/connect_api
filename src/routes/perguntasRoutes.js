@@ -13,11 +13,18 @@ router.get('/participante/:participanteId/votos', perguntasController.contarVoto
 // GET /api/v1/perguntas/palestra/:palestraId - Listar perguntas aprovadas de uma palestra
 router.get('/palestra/:palestraId', perguntasController.listarPorPalestra);
 
+// GET /api/v1/perguntas/palestra/:palestraId/pendentes/:participanteId - Perguntas pendentes do participante
+router.get('/palestra/:palestraId/pendentes/:participanteId', perguntasController.listarPendentesPorParticipante);
+
+
 // POST /api/v1/perguntas - Criar nova pergunta
 router.post('/', perguntasController.criar);
 
 // GET /api/v1/perguntas/:id - Buscar pergunta específica
 router.get('/:id', perguntasController.buscarPorId);
+
+// PUT /api/v1/perguntas/:id - Editar pergunta (autor, pendente)
+router.put('/:id', perguntasController.editarPergunta);
 
 // PUT /api/v1/perguntas/:id/curtir - Toggle voto
 router.put('/:id/curtir', perguntasController.toggleCurtida);
@@ -35,3 +42,4 @@ router.patch('/:id/rejeitar', perguntasController.rejeitarPergunta);
 router.delete('/:id', perguntasController.deletarPergunta);
 
 export default router;
+
