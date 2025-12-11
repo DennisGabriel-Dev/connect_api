@@ -35,6 +35,9 @@ router.put('/:id/responder', perguntasController.responder);
 // PATCH /api/v1/perguntas/:id/aprovar - Aprovar pergunta (Admin)
 router.patch('/:id/aprovar', perguntasController.aprovarPergunta);
 
+// PATCH /api/v1/perguntas/:id/premiar - Premiar pergunta
+router.patch('/:id/premiar', perguntasController.premiarPergunta);
+
 // PATCH /api/v1/perguntas/:id/rejeitar - Rejeitar pergunta (Admin)
 router.patch('/:id/rejeitar', perguntasController.rejeitarPergunta);
 
