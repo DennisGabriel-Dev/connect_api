@@ -34,13 +34,9 @@ export const criar = async (req, res) => {
 export const listarPorPalestra = async (req, res) => {
   try {
     const { palestraId } = req.params;
-    const { status } = req.query;
 
     // Se status não especificado, mostra apenas aprovadas
-    const perguntas = await perguntasService.listarPerguntasPorPalestra(
-      palestraId,
-      status || 'aprovada'
-    );
+    const perguntas = await perguntasService.listarPerguntasPorPalestra(palestraId);
 
     return res.status(200).json({
       success: true,
@@ -352,6 +348,60 @@ export const aprovarPergunta = async (req, res) => {
   } catch (error) {
     console.error("Erro ao aprovar pergunta:", error);
     return res.status(500).json({ error: "Erro ao aprovar pergunta." });
+  }
+};
+
+// Premiar pergunta - Admin
+export const premiarPergunta = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const pergunta = await prisma.pergunta.findUnique({
+      where: { id }
+    });
+
+    if (!pergunta) {
+      return res.status(404).json({ error: "Pergunta não encontrada" });
+    }
+
+    const palestraId = pergunta.palestraId;
+
+    const [perguntasAnteriores, perguntaAtualizada] = await prisma.$transaction([
+      prisma.pergunta.updateMany({
+        where: {
+          palestraId: palestraId,
+          status: 'premiada',
+          id: { not: id }
+        },
+        data: {
+          status: 'aprovada'
+        }
+      }),
+      prisma.pergunta.update({
+        where: { id },
+        data: { status: "premiada" },
+        include: {
+          participante: {
+            select: {
+              id: true,
+              nome: true
+            }
+          },
+          palestra: {
+            select: {
+              id: true,
+              titulo: true
+            }
+          }
+        }
+      })
+    ]);
+
+    return res.status(200).json(perguntaAtualizada);
+
+  } catch (error) {
+    console.error("Erro ao premiar pergunta:", error);
+    return res.status(500).json({ error: "Erro ao premiar pergunta." });
   }
 };
 

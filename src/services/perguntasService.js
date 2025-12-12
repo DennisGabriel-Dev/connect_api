@@ -24,15 +24,12 @@ export async function criarPergunta({ texto, participanteId, palestraId }) {
 
 // Listar perguntas por palestra (ordenadas por votos)
 export async function listarPerguntasPorPalestra(palestraId, status = null) {
-    const whereClause = { palestraId };
-
-    // Se status for especificado, filtrar por ele
-    if (status) {
-        whereClause.status = status;
-    }
 
     const perguntas = await prisma.pergunta.findMany({
-        where: whereClause,
+        where: {
+            palestraId: palestraId,
+            status: { in: ['aprovada', 'premiada']}
+        },
         include: {
             participante: {
                 select: { nome: true, id: true }
